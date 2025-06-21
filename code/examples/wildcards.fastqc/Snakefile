@@ -1,6 +1,6 @@
-# targets: -n
+# 대상: -n
 
-# ANCHOR: content
+# ANCHOR: 내용
 FASTQ_FILES = glob_wildcards("{sample}.fastq")
 
 rule all:
@@ -24,4 +24,4 @@ rule fastqc_raw:
     shell: """
        fastqc {input:q}
     """
-# ANCHOR_END: content
+# ANCHOR_END: 내용

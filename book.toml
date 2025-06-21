@@ -1,15 +1,15 @@
 [book]
 authors = ["C. Titus Brown"]
-language = "en"
+language = "ko"  # 영어에서 한국어로 변경
 multilingual = false
 src = "src"
-title = "An Introduction to Snakemake for Bioinformatics"
+title = "생물정보학을 위한 Snakemake 소개" # 한국어로 번역
 
 [preprocessor]
 
 [preprocessor.admonish]
 command = "mdbook-admonish"
-assets_version = "2.0.0" # do not edit: managed by `mdbook-admonish install`
+assets_version = "2.0.0" # 편집하지 마십시오: `mdbook-admonish install`에 의해 관리됨
 on_failure = "bail"
 
 [output]

@@ -1,8 +1,8 @@
-# expect_fail
+# 실패 예상
 
 rule example:
     output:
        "file-does-not-exist"
     shell: """
        touch file-does-not-exist-typo
-    """   
+    """

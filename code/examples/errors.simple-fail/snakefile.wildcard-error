@@ -1,4 +1,4 @@
-# expect_fail
+# 실패 예상
 
 rule example:
     input: "{name}.input"

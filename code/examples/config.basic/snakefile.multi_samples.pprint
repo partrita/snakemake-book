@@ -2,13 +2,13 @@ import pprint
 
 configfile: "config.multi_samples.yml"
 
-# print out the config dictionary
+# config 딕셔너리 출력
 print('config is:')
 pprint.pprint(config)
 
 SAMPLES=config['samples']
 
-# print out the SAMPLES variable
+# SAMPLES 변수 출력
 print('SAMPLES is:')
 pprint.pprint(SAMPLES)
 

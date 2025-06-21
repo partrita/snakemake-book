@@ -1,6 +1,6 @@
-# targets: -n
+# 대상: -n
 
-# ANCHOR: content
+# ANCHOR: 내용
 
 rule all:
     input:
@@ -15,4 +15,4 @@ rule assemble:
     shell: """
         megahit -1 {input.R1} -2 {input.R2} -o {output}
     """
-# ANCHOR_END: content
+# ANCHOR_END: 내용

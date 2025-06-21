@@ -1,14 +1,12 @@
-# Python basics
+# 파이썬 기초
 
-* lists and dictionaries
-* functions
-* lambda (?)
-* whitespace
+* 리스트와 딕셔너리
+* 함수
+* 람다 (?)
+* 공백
 * print, file=
-* namespaces
-* reading and writing files - text mode
-* reading CSVs with pandas
-* f-strings
-* arguments and keyword arguments
-
-
+* 네임스페이스
+* 파일 읽고 쓰기 - 텍스트 모드
+* pandas로 CSV 읽기
+* f-문자열
+* 인수와 키워드 인수

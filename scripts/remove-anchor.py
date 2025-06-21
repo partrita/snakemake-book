@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 """
-remove lines with substring ANCHOR in them, for use w/cmdrun.
+cmdrun과 함께 사용하기 위해 ANCHOR 하위 문자열이 포함된 줄을 제거합니다.
 """
 import sys
 import argparse

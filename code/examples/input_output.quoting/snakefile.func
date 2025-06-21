@@ -1,17 +1,17 @@
-# targets: output5.txt
+# 대상: output5.txt
 
-# ANCHOR: content
+# ANCHOR: 내용
 def multiply_by_5(w):
     return f"file{int(w.val) * 5}.txt"
     
     
 rule make_file:
     input:
-        # look for input file{val*5}.txt if asked to create output{val}.txt
+        # output{val}.txt를 만들도록 요청받으면 입력 파일 file{val*5}.txt를 찾습니다.
         filename=multiply_by_5,
     output:
         "output{val}.txt"
     shell: """
         cp {input} {output:q}
     """
-# ANCHOR_END: content
+# ANCHOR_END: 내용

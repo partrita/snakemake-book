@@ -1,13 +1,13 @@
-# first, find matches to filenames of this form:
+# 먼저, 이 형식의 파일 이름과 일치하는 항목을 찾습니다.
 files = glob_wildcards("original/{sample}_L001_{r}_001.fastq")
 
-# next, specify the form of the name you want:
+# 다음으로, 원하는 이름의 형식을 지정합니다.
 rule all:
     input:
         expand("renamed/{sample}_{r}.fastq", zip,
                sample=files.sample, r=files.r)
 
-# finally, give snakemake a recipe for going from inputs to outputs.
+# 마지막으로, 입력에서 출력으로 이동하는 레시피를 snakemake에 제공합니다.
 rule rename:
     input:
         "original/{sample}_L001_{r}_001.fastq",

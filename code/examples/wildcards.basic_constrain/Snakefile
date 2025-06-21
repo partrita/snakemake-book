@@ -1,17 +1,17 @@
-# ANCHOR: constraints
-# match all .txt files - no constraints
+# ANCHOR: 제약 조건
+# 모든 .txt 파일 일치 - 제약 조건 없음
 all_files = glob_wildcards("{filename}.txt").filename
 
-# match all .txt files in this directory only - avoid /
+# 이 디렉터리의 모든 .txt 파일만 일치 - / 방지
 this_dir_files = glob_wildcards("{filename,[^/]+}.txt").filename
 
-# match all files with only a single period in their name - avoid .
+# 이름에 마침표가 하나만 있는 모든 파일 일치 - . 방지
 prefix_only = glob_wildcards("{filename,[^.]+}.txt").filename
 
-# match all files in this directory with only a single period in their name
-# avoid / and .
+# 이 디렉터리에서 이름에 마침표가 하나만 있는 모든 파일 일치
+# / 및 . 방지
 prefix_and_dir_only = glob_wildcards("{filename,[^./]+}.txt").filename
-# ANCHOR_END: constraints
+# ANCHOR_END: 제약 조건
 
 print(all_files)
 print(this_dir_files)

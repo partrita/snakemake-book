@@ -1,8 +1,8 @@
 def calc_num_lines(wildcards):
-    # convert wildcards.num_records to an integer:
+    # wildcards.num_records를 정수로 변환합니다.
     num_records = int(wildcards.num_records)
 
-    # calculate number of lines (records * 4)
+    # 줄 수를 계산합니다 (레코드 * 4).
     num_lines = num_records * 4
 
     return num_lines

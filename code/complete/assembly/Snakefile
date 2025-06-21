@@ -1,4 +1,4 @@
-# ignore
+# 무시
 
 wildcard_constraints:
     lines="\d+"
@@ -45,7 +45,7 @@ rule assemble_subset:
         megahit -1 {input.r1} -2 {input.r2} -f -m 5e9 -t 4 -o {output}
     """
 
-# copy the final.contigs.{something}.fa file out of the megahit assembly directory
+# megahit 어셈블리 디렉터리에서 final.contigs.{something}.fa 파일 복사
 rule copy_genome_contigs2:
     input:
         "{sample}.{label}.out"
@@ -54,7 +54,7 @@ rule copy_genome_contigs2:
     shell:
         "cp {input}/final.contigs.fa {output}"
 
-# annotate an assembly using prokka; *.contigs.fa -> *.prokka
+# prokka를 사용하여 어셈블리 주석 달기; *.contigs.fa -> *.prokka
 rule annotate_contigs:
     input:
         "{prefix}.contigs.fa"
@@ -63,15 +63,15 @@ rule annotate_contigs:
     threads: 8
     conda: "env-prokka.yml"
     shell:
-        # note: a bug in prokka+megahit means we have to force success.
-        # that's what "|| :" does.
+        # 참고: prokka+megahit의 버그로 인해 강제로 성공해야 합니다.
+        # 이것이 "|| :"가 하는 일입니다.
         "prokka --outdir {output} --prefix {wildcards.prefix} {input} --cpus {threads} || :"
 
-# evaluate an assembly using quast; *.contigs.fa => *.quast
+# quast를 사용하여 어셈블리 평가; *.contigs.fa => *.quast
 rule quast_eval:
     input:
         "{prefix}.contigs.fa"
-    conda: "env-quast.yml"      # note, you need to run this with --use-conda!
+    conda: "env-quast.yml"      # 참고: --use-conda와 함께 실행해야 합니다!
     output:
         directory("{prefix}.quast")
     shell: "quast {input} -o {output}"

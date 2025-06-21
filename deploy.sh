@@ -2,30 +2,30 @@
 set -e
 set -x
 
-# create a temp directory & build book into it
+# 임시 디렉터리를 만들고 그 안에 책을 빌드합니다.
 tmpdir=$(mktemp -d /tmp/bookXXX)
 mdbook build -d ${tmpdir}
-echo "build directory is: ${tmpdir}"
+echo "빌드 디렉터리: ${tmpdir}"
 
-# go to temp directory
+# 임시 디렉터리로 이동합니다.
 cd ${tmpdir}
 
-# indicate that GitHub should not interpret this as a Jekyll site, i.e.
-# it's a static site.
+# GitHub이 이를 Jekyll 사이트로 해석해서는 안 됨을 나타냅니다. 즉,
+# 정적 사이트입니다.
 touch .nojekyll
 
-# create new git repo
+# 새 git 저장소를 만듭니다.
 git init
 
-# ignore ~ files from emacs
+# emacs의 ~ 파일을 무시합니다.
 echo '*~' > .gitignore
 
-# add all fles in branch 'main'
+# 'main' 브랜치의 모든 파일을 추가합니다.
 git add .
 git branch -M main
 
-# commit
+# 커밋합니다.
 git commit -m "latest"
 
-# push to github pages
+# github 페이지로 푸시합니다.
 git push -f https://github.com/ngs-docs/2023-snakemake-book-draft main:gh-pages

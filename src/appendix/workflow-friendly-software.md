@@ -1,26 +1,25 @@
-# Writing software that is workflow-friendly
+# 워크플로 친화적인 소프트웨어 작성
 
-## Support error codes properly
+## 오류 코드를 올바르게 지원
 
-## Support command line options
+## 명령줄 옵션 지원
 
-## Support `-o/--output` and/or `--output-directory`
+## `-o/--output` 및/또는 `--output-directory` 지원
 
-## Support command-line configurability
+## 명령줄 구성 가능성 지원
 
-i.e. don't require config files, or if you do, allow override via command
-line.
+즉, 구성 파일이 필요하지 않거나, 필요한 경우 명령줄을 통해 재정의할 수 있도록 허용합니다.
 
-## Use stdout and stderr consistently
+## stdout 및 stderr를 일관성 있게 사용
 
-## Don't have side effects outside the directory etc
+## 디렉터리 외부 등에 부작용이 없도록 함
 
-operate entirely within directories specified
+지정된 디렉터리 내에서만 작동
 
-## something about caching/caches?
+## 캐싱/캐시에 관한 내용?
 
-## use semantic versioning and/or clearly guide people
+## 시맨틱 버전 관리 사용 및/또는 명확하게 안내
 
-## make it conda installable :)
+## conda로 설치 가능하게 만들기 :)
 
 ## ??

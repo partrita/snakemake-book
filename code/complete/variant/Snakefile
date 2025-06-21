@@ -1,6 +1,6 @@
-# ignore
+# 무시
 
-# ANCHOR: download
+# ANCHOR: 다운로드
 
 rule download_data:
     output: "SRR2584857_1.fastq.gz"
@@ -13,9 +13,9 @@ rule download_genome:
     shell:
         "curl -JLO https://osf.io/8sm92/download -o {output}"
 
-# ANCHOR_END: download
+# ANCHOR_END: 다운로드
 
-# ANCHOR: mapping
+# ANCHOR: 매핑
 
 rule map_reads:
     input:
@@ -26,7 +26,7 @@ rule map_reads:
         minimap2 -ax sr {input.ref} {input.reads} > {output}
     """
 
-# ANCHOR_END: mapping
+# ANCHOR_END: 매핑
 
 # ANCHOR: sam_to_bam
 
@@ -46,7 +46,7 @@ rule sort_bam:
 
 # ANCHOR_END: sam_to_bam
 
-# ANCHOR: call
+# ANCHOR: 호출
 
 rule call_variants:
     input:
@@ -64,4 +64,4 @@ rule call_variants:
         bcftools view {output.bcf} > {output.vcf}
     """
 
-# ANCHOR_END: call
+# ANCHOR_END: 호출

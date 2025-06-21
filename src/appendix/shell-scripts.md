@@ -1,18 +1,18 @@
-# UNIX and scripting: executing text files
+# 유닉스와 스크립팅: 텍스트 파일 실행
 
-- using `#!`
-- permissions - chmod +x
-- use /usr/bin/env to support conda
-- point at [workflow friendly software](workflow-friendly-software.md) rules
+- `#!` 사용
+- 권한 - chmod +x
+- conda를 지원하기 위해 /usr/bin/env 사용
+- [워크플로 친화적인 소프트웨어](workflow-friendly-software.md) 규칙을 가리킴
 
 ## bash
 
-- bash sekrets: -e, -x
+- bash 비밀: -e, -x
 
-## python scripts
+## 파이썬 스크립트
 
-argparse or other
+argparse 또는 기타
 
-## R scripts with `Rscript`
+## `Rscript`를 사용한 R 스크립트
 
-(use example from taylor interaction)
+(테일러 상호 작용의 예 사용)

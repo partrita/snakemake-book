@@ -1,6 +1,6 @@
-# targets: -n
+# 대상: -n
 
-# ANCHOR: content
+# ANCHOR: 내용
 rule all:
     input:
         "reads.sam"
@@ -13,4 +13,4 @@ rule use_params:
     shell: """
         bowtie index -U {input} -S {params.prefix}
     """
-# ANCHOR_END: content
+# ANCHOR_END: 내용

@@ -1,8 +1,7 @@
-# Beyond -j - parallelizing snakemake
+# -j를 넘어 - snakemake 병렬화
 
-## One computer, many processes
+## 하나의 컴퓨터, 많은 프로세스
 
-## Multiple computers with a shared file system
+## 공유 파일 시스템을 사용하는 여러 컴퓨터
 
-## Multiple independent computers and e.g. AWS batch
-
+## 여러 독립적인 컴퓨터 및 예: AWS 배치

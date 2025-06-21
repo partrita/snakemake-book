@@ -1,4 +1,4 @@
-name: Run tests
+name: 테스트 실행
 
 on:
   push:
@@ -14,14 +14,14 @@ jobs:
         os: [ubuntu-latest]
         python: [3.9]
 
-    name: Python on ${{ matrix.python }}
+    name: ${{ matrix.python }}에서의 파이썬
 
     steps:
-      - name: checkout
+      - name: 체크아웃
         uses: actions/checkout@v3
 
-      # per https://github.com/conda-incubator/setup-miniconda#caching-environments
-      - name: Setup Mambaforge
+      # https://github.com/conda-incubator/setup-miniconda#caching-environments 에 따름
+      - name: Mambaforge 설정
         uses: conda-incubator/setup-miniconda@v2
         with:
           miniforge-variant: Mambaforge
@@ -30,12 +30,12 @@ jobs:
           use-mamba: true
           python-version: ${{ matrix.python }}
 
-      - name: Get Date
+      - name: 날짜 가져오기
         id: get-date
         run: echo "today=$(/bin/date -u '+%Y%m%d')" >> $GITHUB_OUTPUT
         shell: bash
 
-      - name: Cache Conda env
+      - name: Conda 환경 캐시
         uses: actions/cache@v3
         with:
           path: ${{ env.CONDA }}/envs
@@ -45,34 +45,34 @@ jobs:
             hashFiles('environment-caching.yml') }}-${{ env.CACHE_NUMBER
             }}
         env:
-          # Increase this value to reset cache if etc/example-environment.yml has not changed
+          # etc/example-environment.yml이 변경되지 않은 경우 캐시를 재설정하려면 이 값을 늘립니다.
           CACHE_NUMBER: 0
           id: cache
 
-      - name: Update environment
+      - name: 환경 업데이트
         run:
           mamba env update -n anaconda-client-env -f environment.yml
         if: steps.cache.outputs.cache-hit != 'true'
 
-      - name: Show Python version
+      - name: 파이썬 버전 표시
         shell: bash -el {0}
         run: python -V
 
-      - name: Conda info
+      - name: Conda 정보
         shell: bash -el {0}
         run: conda info
 
-      - name: Conda list
+      - name: Conda 목록
         shell: bash -el {0}
         run: conda list
 
-      - name: Cache cargo env
+      - name: cargo 환경 캐시
         uses: Swatinem/rust-cache@v2      
 
-      - name: Install mdbook
+      - name: mdbook 설치
         shell: bash -el {0}
         run: cargo install mdbook mdbook-admonish mdbook-cmdrun
 
-      - name: Run tests
+      - name: 테스트 실행
         shell: bash -el {0}
         run: make test

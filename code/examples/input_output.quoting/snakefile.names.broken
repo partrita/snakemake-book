@@ -1,6 +1,6 @@
-# expect_fail
+# 실패 예상
 
-# ANCHOR: content
+# ANCHOR: 내용
 rule example:
    input:
        a="file1.txt",
@@ -9,4 +9,4 @@ rule example:
    shell: """
        echo first input is {input.z:q}
    """
-# ANCHOR_END: content
+# ANCHOR_END: 내용

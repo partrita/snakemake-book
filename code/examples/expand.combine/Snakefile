@@ -1,13 +1,13 @@
-# targets: -n all_product all_zip all_zip_short
+# 대상: -n all_product all_zip all_zip_short
 
-# ANCHOR: combinatorial
+# ANCHOR: 조합
 X = [1, 2, 3]
 Y = ['a', 'b', 'c']
 
 rule all_product:
    input:
       expand('{x}.by.{y}', x=X, y=Y)
-# ANCHOR_END: combinatorial
+# ANCHOR_END: 조합
 
 assert len(expand('{x}.by.{y}', x=X, y=Y)) == 9
 

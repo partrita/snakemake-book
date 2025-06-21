@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 """
-Display a unified diff between two files, for use w/cmdrun and 'diff' hilite.
+cmdrun 및 'diff' 강조 표시와 함께 사용할 두 파일 간의 통합 diff를 표시합니다.
 """
 import sys
 import argparse

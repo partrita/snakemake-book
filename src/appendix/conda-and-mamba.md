@@ -1,1 +1,1 @@
-# Getting started with conda and mamba
+# conda 및 mamba 시작하기

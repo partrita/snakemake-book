@@ -1,12 +1,11 @@
 #! /usr/bin/env python
 """
-Find all files matching 'Snakefile' or 'snakefile.*', and write shell
-code to run them. Very much a WIP.
+'Snakefile' 또는 'snakefile.*'과 일치하는 모든 파일을 찾아 실행할 셸 코드를 작성합니다. 아직 작업 중입니다.
 
 TODO?
-- set bash foo
-- write individual shell scripts => support parallel??
-- support isolated build/etc directories
+- bash foo 설정
+- 개별 셸 스크립트 작성 => 병렬 지원??
+- 격리된 빌드/기타 디렉터리 지원
 """
 import sys
 import os
@@ -63,7 +62,7 @@ def main():
     p.add_argument('-d', '--debug', action='store_true')
     p.add_argument('-q', '--quiet', action='store_true')
     p.add_argument('-k', '--keyword-limit-pattern', default=None,
-                   help="specify keyword required in filename to run")
+                   help="실행할 파일 이름에 필요한 키워드 지정")
     args = p.parse_args()
 
     snakefiles = []
@@ -73,12 +72,12 @@ def main():
         snakefiles.extend(pp.glob('**/Snakefile'))
         snakefiles.extend(pp.glob('**/snakefile.*'))
 
-    # filter:
+    # 필터:
     snakefiles_filtered = []
     for ss in snakefiles:
         if any(f(ss) for f in PATH_FILTERS):
             if args.debug:
-                print(f"(removing '{str(ss)}' from paths because of a filter)",
+                print(f"(필터로 인해 경로에서 '{str(ss)}' 제거 중)",
                       file=sys.stderr)
             continue
 
@@ -86,18 +85,18 @@ def main():
             if args.keyword_limit_pattern not in str(ss):
                 continue
 
-        # keep!
+        # 유지!
         snakefiles_filtered.append(ss)
 
     snakefiles = snakefiles_filtered
         
-    print(f"found {len(snakefiles)} snakefiles to run!", file=sys.stderr)
+    print(f"실행할 snakefile {len(snakefiles)}개 발견!", file=sys.stderr)
 
     if args.list_snakefiles:
         print("\n".join([ str(ss) for ss in snakefiles ]))
 
     if args.output:
-        print(f"Saving run script to '{args.output}'", file=sys.stderr)
+        print(f"실행 스크립트를 '{args.output}'에 저장 중", file=sys.stderr)
         output = open(args.output, 'wt')
 
         print("#! /bin/bash", file=output)
@@ -109,7 +108,7 @@ def main():
 
             if 'ignore' in metadata and metadata['ignore']:
                 if not args.quiet:
-                    print(f"(IGNORING '{snakefile}' per metadata)",
+                    print(f"(메타데이터에 따라 '{snakefile}' 무시 중)",
                           file=sys.stderr)
                 continue
             

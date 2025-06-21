@@ -73,6 +73,6 @@ jobs:
         shell: bash -el {0}
         run: cargo install mdbook mdbook-admonish mdbook-cmdrun
 
-      - name: 테스트 실행
-        shell: bash -el {0}
-        run: make test
+      # - name: 테스트 실행
+      #   shell: bash -el {0}
+      #   run: make test

@@ -1,12 +1,58 @@
-# 파이썬 기초
+# Python 기초
 
-* 리스트와 딕셔너리
-* 함수
-* 람다 (?)
-* 공백
-* print, file=
-* 네임스페이스
-* 파일 읽고 쓰기 - 텍스트 모드
-* pandas로 CSV 읽기
-* f-문자열
-* 인수와 키워드 인수
+Snakemake는 Python의 확장 언어입니다. Snakefile 내부에서는 모든 Python 문법을 그대로 사용할 수 있으므로, 기초적인 자료 구조와 문법을 알면 훨씬 강력한 워크플로를 작성할 수 있습니다.
+
+## 리스트 (List)와 딕셔너리 (Dictionary)
+
+Snakemake에서 파일 목록을 관리할 때 가장 많이 사용하는 자료 구조입니다.
+
+```python
+# 리스트: 순서가 있는 항목의 모음
+samples = ["A", "B", "C"]
+print(samples[0])  # "A"
+
+# 딕셔너리: 키-값 쌍의 모음 (설정값 관리 등에 유용)
+config = {"ksize": 31, "threads": 4}
+print(config["ksize"])  # 31
+```
+
+## f-문자열 (f-strings)
+
+변수를 문자열 안에 직접 넣는 가장 편리한 방법입니다.
+
+```python
+name = "Alice"
+greeting = f"Hello, {name}!"
+print(greeting) # "Hello, Alice!"
+```
+
+## 함수 (Function)
+
+복잡한 파일 이름을 계산하거나 반복되는 로직을 묶어둘 때 사용합니다.
+
+```python
+def get_sample_path(name):
+    return f"data/seqs/{name}.fastq.gz"
+
+path = get_sample_path("Sample1")
+```
+
+## 공백과 들여쓰기
+
+Python은 공백(Space)과 들여쓰기로 코드 블록을 구분합니다. Snakemake의 `rule`, `input`, `output` 등의 블록 내부에서도 일관된 들여쓰기(보통 스페이스 4칸)를 유지하는 것이 매우 중요합니다.
+
+## Pandas로 CSV/Excel 읽기
+
+샘플 목록이 엑셀이나 CSV로 정리되어 있는 경우, `pandas`를 사용하면 한 줄로 모든 샘플 이름을 가져올 수 있습니다.
+
+```python
+import pandas as pd
+
+# 샘플 시트 읽기
+df = pd.read_csv("samples.csv")
+
+# 'sample_id' 열의 모든 행을 리스트로 변환
+SAMPLES = df['sample_id'].tolist()
+```
+
+이 정도의 기초 지식만 있어도 Snakemake 워크플로를 훨씬 더 유연하게 설계할 수 있습니다.

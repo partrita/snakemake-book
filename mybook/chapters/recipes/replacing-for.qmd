@@ -1,1 +1,45 @@
-# Applying one rule to many files - replacing for loops in shell scripts
+# 레시피: 셸 스크립트의 for 루프를 Snakemake 규칙으로 교체하기
+
+전통적인 셸 스크립트에서는 여러 파일에 대해 동일한 작업을 반복할 때 `for` 루프를 사용합니다. 하지만 Snakemake의 와일드카드와 규칙 기반 시스템을 사용하면 이를 훨씬 더 안전하고 병렬화하기 쉬운 방식으로 바꿀 수 있습니다.
+
+## 셸 스크립트 방식 (for 루프)
+
+```bash
+#!/bin/bash
+# 모든 fastq 파일에 대해 fastqc 실행
+for file in data/*.fastq; do
+    fastqc "$file"
+done
+```
+
+**이 방식의 문제점:**
+1.  **순차 실행**: 파일이 100개라면 하나씩 차례대로 처리하므로 시간이 오래 걸립니다.
+2.  **불필요한 중복 실행**: 결과 파일이 이미 있어도 루프는 무조건 모든 명령을 다시 실행합니다.
+3.  **오류 관리**: 중간에 하나가 실패해도 스크립트가 중단되지 않거나, 어디서 실패했는지 찾기 어렵습니다.
+
+## Snakemake 방식 (와일드카드 규칙)
+
+```python
+SAMPLES = ["sampleA", "sampleB", "sampleC"]
+
+rule all:
+    input:
+        expand("results/{s}_fastqc.html", s=SAMPLES)
+
+rule run_fastqc:
+    input:
+        "data/{sample}.fastq"
+    output:
+        "results/{sample}_fastqc.html"
+    shell:
+        "fastqc {input} -o results/"
+```
+
+**Snakemake 방식의 장점:**
+1.  **자동 병렬화**: `snakemake -j 4`라고 실행하면 위 규칙을 4개의 CPU 코어에서 동시에 실행합니다. 루프를 쪼개는 코드를 짤 필요가 없습니다.
+2.  **증분 업데이트**: `sampleA`의 결과만 삭제했다면, Snakemake는 `sampleA`에 대해서만 규칙을 다시 실행합니다.
+3.  **의존성 기반**: 만약 `fastqc` 결과를 가지고 다른 처리를 해야 한다면, 그냥 다음 규칙의 입력으로 지정하기만 하면 됩니다.
+
+## 요약
+
+단순한 반복 작업이라도 Snakemake 규칙으로 작성하면 **병렬 처리**와 **효율적인 재실행**이라는 강력한 혜택을 누릴 수 있습니다. `for` 루프를 사용하고 싶은 유혹이 든다면, 그것을 와일드카드를 포함한 하나의 규칙으로 바꿀 수 없는지 먼저 고민해 보세요.

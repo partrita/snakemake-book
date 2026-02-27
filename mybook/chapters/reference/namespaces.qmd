@@ -1,11 +1,36 @@
-# 네임스페이스
+# 네임스페이스 (Namespaces)
 
-`wildcards` 네임스페이스는 **규칙 내부에서만** 사용 가능합니다.
-이는 와일드카드가 개별 규칙 안에서만 존재하며,
-규칙 간에 공유되지 않기 때문입니다!
+Snakemake는 규칙(`rule`) 내에서 다양한 정보를 구조화된 방식으로 관리하며, 이를 위해 여러 가지 **네임스페이스**를 제공합니다. 각 네임스페이스는 관련 있는 변수들의 묶음이라고 생각하면 됩니다.
 
-즉, 다음과 같이 `rule` 블록 바깥에서는 `wildcards`를 참조할 수 없습니다.
-와일드카드는 항상 해당 규칙의 `input:`, `output:`, `shell:` 등의
-블록 안에서만 `{wildcards.이름}` 형태로 접근할 수 있습니다.
+## 주요 네임스페이스 요약
 
-관련 예제: `code/examples/wildcards.namespace`
+| 네임스페이스 | 설명 | 사용 예시 |
+| --- | --- | --- |
+| `input` | 규칙의 입력 파일들에 접근 | `{input}`, `{input.a}` |
+| `output` | 규칙의 출력 파일들에 접근 | `{output}`, `{output.result}` |
+| `wildcards` | 현재 작업에 할당된 와일드카드 값 | `{wildcards.sample}` |
+| `params` | 규칙에 정의된 비파일 매개변수 | `{params.ksize}` |
+| `config` | 설정 파일(config.yaml)의 내용 | `{config[sample]}` |
+| `threads` | 해당 규칙에 할당된 CPU 스레드 수 | `{threads}` |
+| `resources` | 메모리, GPU 등 할당된 자원 정보 | `{resources.mem_mb}` |
+| `log` | 규칙에서 지정된 로그 파일 경로 | `{log}` |
+
+## 주의사항: 유효 범위 (Scope)
+
+대부분의 네임스페이스(특히 `input`, `output`, `wildcards`, `params`)는 **해당 규칙 내부에서만** 유효합니다.
+
+이는 와일드카드가 개별 규칙이 인스턴스화(Instantiation)될 때 결정되기 때문입니다. 규칙 밖에서(예: 파일의 상단) `wildcards.sample`을 참조하려고 하면 오류가 발생합니다.
+
+```python
+# 잘못된 예: 규칙 밖에서 wildcards 참조
+# print(wildcards.sample) 
+
+rule example:
+    input: "{sample}.txt"
+    shell:
+        "echo {wildcards.sample}" # 올바른 예: 규칙 내에서 사용
+```
+
+## 네임스페이스의 편리함
+
+네임스페이스를 사용하면 셸 명령어가 매우 깔끔해집니다. 파일 경로를 일일이 기억하고 타이핑할 필요 없이, `input`이나 `output`과 같은 이름으로 추상화하여 사용할 수 있기 때문입니다. 이는 워크플로의 유지보수성을 크게 높여주는 Snakemake의 핵심 설계 철학입니다.

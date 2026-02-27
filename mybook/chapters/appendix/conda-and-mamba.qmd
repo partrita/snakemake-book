@@ -1,1 +1,53 @@
-# conda 및 mamba 시작하기
+# Conda 및 Mamba 시작하기
+
+생물정보학 도구들은 각기 다른 라이브러리 의존성을 가지고 있어, 여러 도구를 한 시스템에 설치하다 보면 충돌이 발생하기 쉽습니다. Conda(콘다)는 이러한 소프트웨어 설치와 환경 격리를 관리해 주는 강력한 도구입니다.
+
+## 왜 Conda(또는 Mamba)인가요?
+
+*   **환경 격리**: 각 분석 프로젝트마다 독립적인 소프트웨어 환경을 만들 수 있습니다.
+*   **쉬운 설치**: 까다로운 컴파일 과정 없이 명령 하나로 대다수의 도구를 설치할 수 있습니다.
+*   **재현성**: `environment.yml` 파일을 통해 다른 사람과 정확히 동일한 환경을 공유할 수 있습니다.
+
+> **참고**: **Mamba**는 Conda와 완전히 호환되면서도 훨씬 빠른 속도를 제공하는 최신 도구입니다. 가능하면 Mamba 사용을 권장합니다.
+
+## 기본 사용법
+
+### 1. 환경 생성 및 활성화
+```bash
+# 'myenv'라는 이름의 환경을 만들고 python 3.10 설치
+mamba create -n myenv python=3.10
+
+# 환경 활성화
+conda activate myenv
+```
+
+### 2. 패키지 설치
+Bioconda 채널은 생물정보학 도구들의 핵심 창고입니다.
+```bash
+# 도구 설치
+mamba install -c bioconda snakemake sourmash
+```
+
+## `environment.yml` 활용하기
+
+Snakemake는 규칙(`rule`)마다 특정 Conda 환경을 자동으로 구성하고 사용할 수 있는 기능을 제공합니다.
+
+```yaml
+# environment.yml 예시
+name: myproject
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - snakemake=7.25.0
+  - sourmash=4.8.2
+  - pandas
+```
+
+이 파일을 프로젝트 폴더에 두고 다음 명령을 실행하면 모든 의존성이 포함된 환경이 만들어집니다.
+```bash
+mamba env create -f environment.yml
+```
+
+Snakemake 워크플로 실행 시 `--use-conda` 옵션을 주면 각 규칙에 정의된 환경을 자동으로 관리해 줍니다.

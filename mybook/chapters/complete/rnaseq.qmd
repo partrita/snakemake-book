@@ -1,31 +1,18 @@
-# A complete RNAseq example
+# 완전한 RNAseq 분석 예제
 
-Below, we provide a simple yet complete RNAseq analysis workflow.
-From start to finish, this workflow takes in four yeast RNAseq
-read data sets and then:
+아래에서는 간단하지만 완전한 RNAseq 분석 워크플로를 제공합니다.
+이 워크플로는 효모(yeast) RNAseq 리드 데이터셋 4개를 입력으로 받아 처음부터 끝까지 다음 작업을 수행합니다:
 
-* generates FastQC reports for each data set;
-* runs Trimmomatic to remove low quality RNAseq reads;
-* runs FastQC on the trimmed reads;
-* uses salmon to quantify the coding sequences represented in each of the
-  read data sets;
-* uses DESeq2 to load, normalize, and contrast gene expression in the
-  conditions represented by the samples.
-  
-The distinguish new feature of this workflow over the variant calling and
-assembly worklows is that a significant amount of the processing is done
-in R, in an RMarkdown file.
-  
-CTB: do we want to split out the FastQC/multiqc stuff into its own example?
-  
-TODO:
+* 각 데이터셋에 대해 **FastQC** 보고서를 생성합니다.
+* **Trimmomatic**으로 저품질 RNAseq 리드를 제거합니다.
+* 트리밍된 리드에 대해 다시 **FastQC**를 실행합니다.
+* **salmon**으로 각 데이터셋에서 코딩 시퀀스의 발현량을 정량화합니다.
+* **DESeq2**로 샘플 간 유전자 발현을 불러오고, 정규화하고, 비교합니다.
 
-* acknowledge authors!
-* do we write this as a collection of chapters or as a single chapter?
-* build workflow diagram
+이 워크플로가 변이 호출(variant calling) 및 어셈블리 워크플로와 구별되는 특징은,
+처리 과정의 상당 부분이 R의 RMarkdown 파일 안에서 수행된다는 점입니다.
 
-## Exercies
+## 연습 문제
 
-add new data sets
-add some examples of pulling out specific genes by name
-
+* 새로운 데이터셋을 추가해 보세요.
+* 특정 유전자 이름으로 결과를 필터링하는 예제를 만들어 보세요.

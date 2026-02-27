@@ -1,13 +1,12 @@
-# Assembly and evaluating a bacterial genome
+# 세균 게놈 어셈블리 및 평가
 
-In this chapter, we provide a short (but complete!) assembly and evaluation
-workflow for a bacterial genome. This workflow takes paired-end Illumina
-reads and then:
+이 챕터에서는 세균 게놈을 어셈블하고 평가하는 간단하지만 완전한 워크플로를 제공합니다.
+이 워크플로는 페어드엔드(paired-end) Illumina 리드를 입력으로 받아 다음 작업을 수행합니다:
 
-* runs the megahit assembler on them
-* generates a quast report on the assembled genome;
-* annotates the assembled genome with prokka;
+* **megahit** 어셈블러로 게놈을 어셈블합니다.
+* **quast**로 어셈블된 게놈의 품질 보고서를 생성합니다.
+* **prokka**로 어셈블된 게놈에 주석을 답니다.
 
-## Exercises
+## 연습 문제
 
-Parameter sweep with assembler.
+어셈블러의 파라미터를 다양하게 바꿔가며 결과를 비교해 보세요 (파라미터 스윕).

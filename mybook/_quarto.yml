@@ -14,7 +14,6 @@ book:
   search: true
   chapters:
     - index.qmd
-    - chapters/intro.qmd
     - chapters/acknowledgements.qmd
     - part: "섹션 1 - Snakemake 단계별 소개"
       chapters:
@@ -78,7 +77,6 @@ book:
         - chapters/appendix/shell-scripts.qmd
         - chapters/appendix/workflow-friendly-software.qmd
         - chapters/appendix/python.qmd
-    - references.qmd
 
 bibliography: references.bib
 
@@ -87,8 +85,7 @@ format:
     theme: cosmo
     toc: true
     toc-depth: 3
-    number-sections: true
-    number-depth: 3
     code-fold: false
     code-tools: true
     highlight-style: github
+    number-sections: false

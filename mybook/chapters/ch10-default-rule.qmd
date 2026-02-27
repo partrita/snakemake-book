@@ -1,24 +1,22 @@
-# Chapter 10 - using default rules
+# 챕터 10 - 기본 규칙 사용하기
 
-The last change we'll make the Snakefile for this section is
-to add what's known as a default rule. What is this and why?
+이 섹션에서 Snakefile에 마지막으로 적용할 변경 사항은
+**기본 규칙(default rule)**을 추가하는 것입니다.
+이것이 무엇이고 왜 필요한지 살펴봅시다.
 
-The 'why' is easier. Above, we've been careful to provide specific rule
-names or filenames to snakemake, because otherwise it defaults to running
-the first rule in the Snakefile. (There's no other way in which the order
-of rules in the file matters - but snakemake will try to run the first
-rule in the file if you don't give it a rule name or a filename on the
-command line.)
+'왜' 부분이 더 쉽습니다. 지금까지는 Snakemake에게 실행할 규칙 이름이나 파일 이름을
+정확히 제공해야 했습니다. 그렇지 않으면 Snakemake는 기본적으로
+Snakefile의 첫 번째 규칙을 실행합니다.
+(파일 내 규칙의 순서가 중요한 것은 이것뿐입니다.
+명령줄에서 규칙 이름이나 파일 이름을 지정하지 않으면 첫 번째 규칙을 실행합니다.)
 
-This is less than great, because it's one more thing to remember and to
-type. In general, it's better to have what's called a "default rule"
-that lets you just run `snakemake -j 1` to generate the file or files you
-want.
+이것은 불편한 점이 있습니다. 기억하고 입력해야 할 것이 한 가지 더 생기기 때문입니다.
+일반적으로는 **기본 규칙**을 만들어 두어 `snakemake -j 1`만 실행해도
+원하는 파일이 생성되도록 하는 것이 더 좋습니다.
 
-This is straightforward to do, but it involves a slightly different syntax -
-a rule with _only_ an `input`, and no shell or output blocks. Here's
-a default rule for our Snakefile that should be put in the file as
-the first rule:
+방법은 간단하지만, 약간 다른 문법을 사용합니다.
+`input:`만 있고 `shell:`이나 `output:` 블록은 없는 규칙입니다.
+다음은 파일의 맨 위에 위치해야 하는 기본 규칙의 예시입니다:
 
 ```python
 rule all:
@@ -26,19 +24,14 @@ rule all:
         "compare.mat.matrix.png"
 ```
 
-What this rule says is, "I want the file `compare.mat.matrix.png`."
-It doesn't give any instructions on how to do that - that's what the
-rest of the rules in the file are! - and it doesn't _run_ anything,
-because it has no shell block, and nor does it _create_ anything,
-because it has no output block.
+이 규칙이 말하는 것은 "나는 `compare.mat.matrix.png` 파일을 원합니다"입니다.
+어떻게 만들지에 대한 지시는 없습니다. 그것은 파일의 나머지 규칙들이 담당합니다!
+`shell:` 블록이 없으므로 아무것도 *실행*하지 않고,
+`output:` 블록도 없으므로 아무것도 *생성*하지 않습니다.
 
-The logic here is simple, if not straightforward: this rule succeeds
-when that input exists.
+로직은 간단합니다: 이 규칙은 해당 입력 파일이 존재할 때 성공합니다.
 
-If you place that at the top of the Snakefile, then running
-`snakemake -j 1` will produce `compare.mat.matrix.png`. You no
-longer need to provide either a rule name or a filename on the command
-line unless you want to do something _other_ than generate that file,
-in which case whatever you put on the command line will ignore
-the `rule all:`.
-
+이것을 Snakefile의 맨 위에 배치하면, `snakemake -j 1`을 실행하면
+`compare.mat.matrix.png`가 생성됩니다.
+그 파일이 아닌 다른 작업을 하고 싶을 때만 명령줄에 규칙 이름이나 파일 이름을 지정하면 됩니다.
+그 경우 `rule all:`은 무시됩니다.

@@ -1,35 +1,27 @@
-# Chapter 11 - our final Snakefile - review and discussion
+# 챕터 11 - 최종 Snakefile - 복습과 토론
 
-Here's the final Snakefile for comparing four genomes.
+다음은 네 개의 게놈을 비교하는 최종 Snakefile입니다.
 
-This snakemake workflow has the following features:
+이 Snakemake 워크플로의 특징은 다음과 같습니다:
 
-* it has a single list of accessions at the top of the Snakefile, so
-  that more genomes can be added by changing only one place in the
-  file. See
-  [Using `expand` with a single pattern and one list of values](../beginner+/expand.md#using-expand-with-a-single-pattern-and-one-list-of-values)
-  for more discussion of this.
-  
-* the workflow uses a default rule `all`, a "pseudo-rule" that
-  contains only input files. This is the default rule that snakemake
-  will run if executed without any targets on the command line. See
-  [Running rules and choosing targets from the command line](./beginner+/targets.qmd)
-  for some discussion of targets and Snakefile organization.
-  
-* the workflow uses one wildcard rule, `sketch_genome`, to convert
-  _multiple_ genome files ending in `.fna.gz` into sourmash signature files.
-  See [Using wildcards to generalize your rules](./beginner+/wildcards.qmd) for
-  discussion of wildcards.
-  
-* there is also a rule `compare_genomes` that uses `expand` to
-  construct the complete list of genomes signature needed to run
-  `sourmash compare`.  Again, see
-  [using `expand` with a single pattern and one list of values](../beginner+/expand.md#using-expand-with-a-single-pattern-and-one-list-of-values)
-  for more discussion of this.
-  
-* the last rule, `plot_comparison`, takes the output of `compare_genomes`
-  and turns it into a PNG image via `sourmash plot` via the provided
-  shell command.
+* Snakefile 상단에 접근 번호 목록이 하나 있어, 한 곳만 수정하면 더 많은 게놈을 추가할 수 있습니다.
+  자세한 내용은 [`expand`로 파일 이름 목록 만들기](../beginner-plus/expand.qmd)를 참고하세요.
+
+* 워크플로는 기본 규칙 `all`을 사용합니다. 이것은 입력 파일만 포함하는 "의사 규칙(pseudo-rule)"으로,
+  명령줄에서 대상 없이 Snakemake를 실행할 때 기본으로 실행되는 규칙입니다.
+  대상 및 Snakefile 구조에 대한 내용은
+  [명령줄에서 규칙 실행 및 대상 선택](../beginner-plus/targets.qmd)을 참고하세요.
+
+* 워크플로는 하나의 와일드카드 규칙 `sketch_genome`을 사용하여
+  `.fna.gz`로 끝나는 *여러* 게놈 파일을 sourmash 서명 파일로 변환합니다.
+  와일드카드에 대한 자세한 내용은 [와일드카드로 규칙 일반화하기](../beginner-plus/wildcards.qmd)를 참고하세요.
+
+* `compare_genomes` 규칙은 `expand`를 사용하여
+  `sourmash compare` 실행에 필요한 전체 게놈 서명 목록을 구성합니다.
+  자세한 내용은 [`expand` 문서](../beginner-plus/expand.qmd)를 참고하세요.
+
+* 마지막 규칙 `plot_comparison`은 `compare_genomes`의 출력을 받아
+  제공된 셸 명령을 통해 `sourmash plot`으로 PNG 이미지로 변환합니다.
 
 ```python
 ACCESSIONS = ["GCF_000017325.1",
@@ -60,7 +52,7 @@ rule compare_genomes:
     """
 
 rule plot_comparison:
-    message: "compare all input genomes using sourmash"
+    message: "sourmash로 모든 입력 게놈을 비교합니다"
     input:
         "compare.mat"
     output:
@@ -71,7 +63,5 @@ rule plot_comparison:
 
 ```
 
-In the following sections we will cover the core features of snakemake
-used in this Snakefile more thoroughly, and then introduce some more
-complex bioinformatics workflows as well as a number of useful
-patterns and reusable recipes.
+이후 섹션에서는 이 Snakefile에서 사용된 Snakemake의 핵심 기능들을 더 자세히 다루고,
+좀 더 복잡한 생물정보학 워크플로와 여러 유용한 패턴 및 재사용 가능한 레시피도 소개할 것입니다.

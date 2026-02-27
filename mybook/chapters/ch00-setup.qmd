@@ -1,24 +1,27 @@
-# Installation and setup!
+# 설치 및 환경 설정
 
-## Setup and installation
+## 환경 설정 및 설치
 
-I suggest working in a new directory.
+새 디렉토리를 만들고 그 안에서 작업하는 것을 권장합니다.
 
-You'll need to [install snakemake](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html) and [sourmash](https://sourmash.readthedocs.io/en/latest/#installing-sourmash). We suggest using [mamba, via miniforge/mambaforge](https://github.com/conda-forge/miniforge#mambaforge), for this.
+[Snakemake 설치](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html)와
+[sourmash 설치](https://sourmash.readthedocs.io/en/latest/#installing-sourmash)가 필요합니다.
+패키지 관리자로는 [miniforge/mambaforge를 통한 mamba](https://github.com/conda-forge/miniforge#mambaforge) 사용을 권장합니다.
 
-### Getting the data:
+### 데이터 다운로드
 
-You'll need to download these three files:
+아래 세 파일을 다운로드해야 합니다:
 
 * [GCF_000021665.1_ASM2166v1_genomic.fna.gz](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/021/665/GCF_000021665.1_ASM2166v1/GCF_000021665.1_ASM2166v1_genomic.fna.gz)
 * [GCF_000017325.1_ASM1732v1_genomic.fna.gz](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/017/325/GCF_000017325.1_ASM1732v1/GCF_000017325.1_ASM1732v1_genomic.fna.gz)
 * [GCF_000020225.1_ASM2022v1_genomic.fna.gz](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/020/225/GCF_000020225.1_ASM2022v1/GCF_000020225.1_ASM2022v1_genomic.fna.gz)
 
-and rename them so that they are in a subdirectory `genomes/` with the names:
+다운로드한 파일들을 `genomes/` 서브디렉토리 안에 아래 이름으로 변경해 저장하세요:
+
 ```
 GCF_000017325.1.fna.gz
 GCF_000020225.1.fna.gz
 GCF_000021665.1.fna.gz
 ```
 
-Note, you can download saved copies of them here, with the right names: [osf.io/2g4dm/](https://osf.io/2g4dm/).
+이미 올바른 이름으로 저장된 복사본을 [osf.io/2g4dm/](https://osf.io/2g4dm/)에서 다운로드할 수도 있습니다.

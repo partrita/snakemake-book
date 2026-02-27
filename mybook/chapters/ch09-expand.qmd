@@ -1,15 +1,14 @@
-# Chapter 9 - using `expand` to make filenames
+# 챕터 9 - `expand`로 파일 이름 목록 만들기
 
-You might note that the list of files in the `compare_genomes` rule
-all share the same suffix, and they're all built using the same rule.
-Can we use that in some way?
+`compare_genomes` 규칙의 파일 목록을 보면, 모두 같은 접미사를 공유하며
+같은 규칙으로 만들어진다는 것을 알 수 있습니다. 이를 활용할 수 있을까요?
 
-Yes! We can use a function called `expand(...)` and give it a template
-filename to build, and a list of values to insert into that filename.
+네! `expand(...)` 함수를 사용하여 파일 이름 템플릿과 삽입할 값 목록을 전달하면
+파일 이름 목록을 자동으로 만들 수 있습니다.
 
-Below, we build a list of accessions named `ACCESSIONS`, and then use
-`expand` to build the list of input files of the format `{acc}.fna.gz.sig`
-from that list, creating one filename for each value in `ACCESSSIONS`.
+아래에서는 `ACCESSIONS`라는 접근 번호 목록을 만들고,
+`expand`를 사용하여 `{acc}.fna.gz.sig` 형식의 입력 파일 목록을 생성합니다.
+`ACCESSIONS`의 각 값마다 파일 이름이 하나씩 만들어집니다.
 
 ```python
 ACCESSIONS = ["GCF_000017325.1",
@@ -36,7 +35,7 @@ rule compare_genomes:
     """
 
 rule plot_comparison:
-    message: "compare all input genomes using sourmash"
+    message: "sourmash로 모든 입력 게놈을 비교합니다"
     input:
         "compare.mat"
     output:
@@ -47,20 +46,17 @@ rule plot_comparison:
 
 ```
 
-While wildcards and `expand` use the same syntax, they do quite different
-things.
+와일드카드와 `expand`는 같은 문법을 사용하지만, 하는 일은 전혀 다릅니다.
 
-`expand` generates a list of filenames, based on a template and a list
-of values to insert into the template. It is typically used to make a
-list of files that you want snakemake to create for you.
+`expand`는 템플릿과 삽입할 값 목록을 기반으로 파일 이름 목록을 생성합니다.
+주로 Snakemake가 만들어야 할 파일 목록을 지정할 때 사용합니다.
 
-Wildcards in rules provide the rules by which one or more files will
-be actually created. They are recipes that say, "when you want to make
-a file with name that looks like THIS, you can do so from files that
-look like THAT, and here's what to run to make that happen.
+규칙의 와일드카드는 하나 이상의 파일이 실제로 어떻게 만들어질지에 대한 규칙을 제공합니다.
+"**이런** 이름의 파일을 만들고 싶다면, **저런** 파일에서 시작하여 이렇게 실행하면 됩니다"라는
+레시피입니다.
 
-`expand` tells snakemake WHAT you want to make, wildcard rules tell
-snakemake HOW to make those things.
+정리하면:
+- **`expand`**: Snakemake에게 *무엇을* 만들지 알려줍니다.
+- **와일드카드 규칙**: Snakemake에게 *어떻게* 만들지 알려줍니다.
 
-CTB: add discussion about how this is the same as list of strings.
-CTB: refer to [additional expand docs](beginner-plus/expand.qmd).
+자세한 내용은 [`expand` 상세 문서](../beginner-plus/expand.qmd)를 참고하세요.

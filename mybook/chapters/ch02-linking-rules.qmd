@@ -1,15 +1,13 @@
-# Chapter 2 - snakemake connects rules for you!
+# 챕터 2 - Snakemake가 규칙을 연결해 줍니다!
 
-## Chaining rules with `input:` blocks
+## `input:` 블록으로 규칙 연결하기
 
-We can get snakemake to automatically connect rules by providing
-information about the _input_ files a rule needs. Then, if you ask
-snakemake to run a rule that requires certain inputs, it will
-automatically figure out which rules produce those inputs as their
-output, and automatically run them.
+Snakemake에게 규칙이 필요로 하는 **입력** 파일 정보를 알려주면,
+규칙들을 자동으로 연결할 수 있습니다.
+어떤 규칙을 실행해달라고 요청하면, Snakemake는 그 규칙에 필요한 입력 파일을
+어느 규칙이 만들어내는지 자동으로 파악하고 순서에 맞게 실행해 줍니다.
 
-Let's add input information to the `plot_comparison` and `compare_genomes`
-rules:
+`plot_comparison`과 `compare_genomes` 규칙에 입력 정보를 추가해 봅시다:
 
 ```python
 rule sketch_genomes:
@@ -35,7 +33,7 @@ rule compare_genomes:
     """
 
 rule plot_comparison:
-    message: "compare all input genomes using sourmash"
+    message: "sourmash로 모든 입력 게놈을 비교합니다"
     input:
         "compare.mat"
     output:
@@ -46,17 +44,25 @@ rule plot_comparison:
 
 ```
 
-Now you can just ask snakemake to run the last rule:
+이제 마지막 규칙만 실행하도록 요청하면 됩니다:
+
 ```shell
 snakemake -j 1 plot_comparison
 ```
-and snakemake will run the other rules only if those input files don't exist and need to be created.
 
-## Taking a step back
+그러면 Snakemake는 필요한 입력 파일이 없는 경우에만 앞선 규칙들을 자동으로 실행합니다.
 
-The Snakefile is now a lot longer, but it's not _too_ much more complicated - what we've done is split the shell commands up into separate rules and annotated each rule with information  about what file it produces (the output), and what files it requires in order to run (the input).
+## 잠깐 한 걸음 물러서서 생각해보기
 
-This has the advantage of making it so you don't need to rerun commands unnecessarily. This is only a small advantage with our current workflow, because sourmash is pretty fast. But if each step takes an hour to run, avoiding unnecessary steps can make your work go much faster!
+Snakefile이 많이 길어졌지만, 그렇다고 *지나치게* 복잡해진 것은 아닙니다.
+핵심은 셸 명령어들을 개별 규칙 블록으로 분리하고,
+각 규칙이 어떤 파일을 만들어내는지(output)와 어떤 파일이 필요한지(input)를
+명시적으로 적어준 것입니다.
 
-And, as you'll see later, these rules are reusable building blocks that can be incorporated into workflows that each produce different files. So there are other good reasons to break shell commands out into individual rules!
+이렇게 하면 불필요한 명령 재실행을 피할 수 있습니다.
+현재 워크플로에서는 sourmash가 빠르기 때문에 큰 차이가 없지만,
+각 단계가 1시간씩 걸리는 작업이라면, 불필요한 단계 건너뛰기가 작업 시간을 크게 단축시켜 줍니다!
 
+또한 뒤에서 배우겠지만, 이렇게 분리된 규칙들은 재사용 가능한 빌딩 블록이 되어
+서로 다른 파일을 생성하는 다양한 워크플로에 통합할 수 있습니다.
+그것이 셸 명령어를 개별 규칙으로 분리해야 하는 또 다른 좋은 이유입니다!

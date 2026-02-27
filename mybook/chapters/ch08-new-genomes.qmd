@@ -1,14 +1,12 @@
-# Chapter 8 - adding new genomes
+# 챕터 8 - 새 게놈 추가하기
 
-So we've got a new genome, and we can build a sketch for it. Let's
-add it into our comparison, so we're building comparison matrix
-for _four_ genomes, and not just three!
+이제 새 게놈이 있고 그 게놈의 스케치를 만들 수 있습니다.
+이것을 비교에 추가하여 세 게놈이 아닌 *네 게놈*의 비교 행렬을 만들어 봅시다!
 
-To add this new genome in to the comparison, all you need to do is add
-the sketch into the `compare_genomes` input, and snakemake will
-automatically locate the associated genome file and run
-`sketch_genome` on it (as in the previous chapter), and then run
-`compare_genomes` on it.  snakemake will take care of the rest!
+새 게놈을 비교에 추가하려면, 스케치 파일을 `compare_genomes`의 `input:`에 추가하기만 하면 됩니다.
+그러면 Snakemake가 자동으로 연관된 게놈 파일을 찾아 `sketch_genome`을 실행한 후
+(이전 챕터와 같이), `compare_genomes`를 실행합니다.
+나머지는 Snakemake가 알아서 처리해 줍니다!
 
 ```python
 rule sketch_genome:
@@ -33,7 +31,7 @@ rule compare_genomes:
     """
 
 rule plot_comparison:
-    message: "compare all input genomes using sourmash"
+    message: "sourmash로 모든 입력 게놈을 비교합니다"
     input:
         "compare.mat"
     output:
@@ -44,12 +42,11 @@ rule plot_comparison:
 
 ```
 
-Now when you run `snakemake -j 3 plot_comparison` you will get a
-`compare.mat.matrix.png` file that contains a 4x4 matrix! (See Figure.)
+이제 `snakemake -j 3 plot_comparison`을 실행하면 4x4 행렬이 담긴
+`compare.mat.matrix.png` 파일이 생성됩니다! (그림 참고)
 
-![4x4 matrix comparison of genomes](images/2023-snakemake-slithering-section-2-4x4-mat.png)
+![게놈 4개의 4x4 비교 행렬](images/2023-snakemake-slithering-section-2-4x4-mat.png)
 
-Note that the workflow diagram has now expanded to include our fourth genome, too!
+워크플로 다이어그램도 네 번째 게놈을 포함하여 확장되었습니다!
 
-![interm3 graph of jobs](images/2023-snakemake-slithering-section-2-interm4-dag.png?raw=true)
-
+![중간 단계 작업 그래프 (4개 게놈)](images/2023-snakemake-slithering-section-2-interm4-dag.png)

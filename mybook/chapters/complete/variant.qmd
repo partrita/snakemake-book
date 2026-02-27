@@ -1,0 +1,289 @@
+# A complete variant calling example for a bacterial genome
+
+Here, we provide a simple introductory variant calling workflow
+for a bacterial genome. It assumes a haploid genome and it produces
+both unfiltered and quality-filtered variant calls. The workflow
+takes a single-ended read data set from the E. coli LTEE, and then:
+
+* uses minimap2 to align the reads to a reference genome and produce a SAM file;
+* converts the SAM file to a BAM file;
+* sorts and indexes the BAM file;
+* uses mpileup to generate a set of variant calls in a binary format;
+* converts the binary format into a text VCF file;
+* filters the calls based on coverage and quality.
+
+## The complete Snakefile
+
+TODO:
+- add final version of Snakefile!
+
+```python
+
+```
+
+## The annotated Snakefile
+
+### The download rules
+
+* no input, only output
+* curl retrieves files from the Web. useful for genome files etc. can use wget too.
+* for a real workflow with your own data, you would probably omit these
+  rules and instead save the data locally.
+* -o {output} makes sure that the right filename is respected.
+
+```python
+# 무시
+
+# ANCHOR: 다운로드
+
+rule download_data:
+    output: "SRR2584857_1.fastq.gz"
+    shell: """
+        curl -JLO https://osf.io/4rdza/download -o {output}
+    """
+
+rule download_genome:
+    output: "ecoli-rel606.fa.gz"
+    shell:
+        "curl -JLO https://osf.io/8sm92/download -o {output}"
+
+# ANCHOR_END: 다운로드
+
+# ANCHOR: 매핑
+
+rule map_reads:
+    input:
+        reads="SRR2584857_1.fastq.gz",
+        ref="ecoli-rel606.fa.gz"
+    output: "SRR2584857_1.x.ecoli-rel606.sam"
+    shell: """
+        minimap2 -ax sr {input.ref} {input.reads} > {output}
+    """
+
+# ANCHOR_END: 매핑
+
+# ANCHOR: sam_to_bam
+
+rule sam_to_bam:
+    input: "SRR2584857_1.x.ecoli-rel606.sam",
+    output: "SRR2584857_1.x.ecoli-rel606.bam",
+    shell: """
+        samtools view -b -F 4 {input} > {output}
+     """
+
+rule sort_bam:
+    input: "SRR2584857_1.x.ecoli-rel606.bam"
+    output: "SRR2584857_1.x.ecoli-rel606.bam.sorted"
+    shell: """
+        samtools sort {input} > {output}
+    """
+
+# ANCHOR_END: sam_to_bam
+
+# ANCHOR: 호출
+
+rule call_variants:
+    input:
+        ref="ecoli-rel606.fa.gz",
+        bam="SRR2584857_1.x.ecoli-rel606.bam.sorted",
+    output:
+        pileup="SRR2584857_1.x.ecoli-rel606.pileup",
+        ref="ecoli-rel606.fa",
+        bcf="SRR2584857_1.x.ecoli-rel606.bcf",
+        vcf="SRR2584857_1.x.ecoli-rel606.vcf",
+    shell: """
+        gunzip -k {input.ref}
+        bcftools mpileup -Ou -f {output.ref} {input.bam} > {output.pileup}
+        bcftools call -mv -Ob {output.pileup} -o {output.bcf}
+        bcftools view {output.bcf} > {output.vcf}
+    """
+
+# ANCHOR_END: 호출
+
+```
+
+## Doing the initial mapping
+
+```python
+# 무시
+
+# ANCHOR: 다운로드
+
+rule download_data:
+    output: "SRR2584857_1.fastq.gz"
+    shell: """
+        curl -JLO https://osf.io/4rdza/download -o {output}
+    """
+
+rule download_genome:
+    output: "ecoli-rel606.fa.gz"
+    shell:
+        "curl -JLO https://osf.io/8sm92/download -o {output}"
+
+# ANCHOR_END: 다운로드
+
+# ANCHOR: 매핑
+
+rule map_reads:
+    input:
+        reads="SRR2584857_1.fastq.gz",
+        ref="ecoli-rel606.fa.gz"
+    output: "SRR2584857_1.x.ecoli-rel606.sam"
+    shell: """
+        minimap2 -ax sr {input.ref} {input.reads} > {output}
+    """
+
+# ANCHOR_END: 매핑
+
+# ANCHOR: sam_to_bam
+
+rule sam_to_bam:
+    input: "SRR2584857_1.x.ecoli-rel606.sam",
+    output: "SRR2584857_1.x.ecoli-rel606.bam",
+    shell: """
+        samtools view -b -F 4 {input} > {output}
+     """
+
+rule sort_bam:
+    input: "SRR2584857_1.x.ecoli-rel606.bam"
+    output: "SRR2584857_1.x.ecoli-rel606.bam.sorted"
+    shell: """
+        samtools sort {input} > {output}
+    """
+
+# ANCHOR_END: sam_to_bam
+
+# ANCHOR: 호출
+
+rule call_variants:
+    input:
+        ref="ecoli-rel606.fa.gz",
+        bam="SRR2584857_1.x.ecoli-rel606.bam.sorted",
+    output:
+        pileup="SRR2584857_1.x.ecoli-rel606.pileup",
+        ref="ecoli-rel606.fa",
+        bcf="SRR2584857_1.x.ecoli-rel606.bcf",
+        vcf="SRR2584857_1.x.ecoli-rel606.vcf",
+    shell: """
+        gunzip -k {input.ref}
+        bcftools mpileup -Ou -f {output.ref} {input.bam} > {output.pileup}
+        bcftools call -mv -Ob {output.pileup} -o {output.bcf}
+        bcftools view {output.bcf} > {output.vcf}
+    """
+
+# ANCHOR_END: 호출
+
+```
+
+## Converting SAM to BAM
+
+* why do this separately rather than all in one?
+  * error messages get conflated if you do too many things
+  * good practice to separate things for parallel etc
+* filtering of unmapped reads in first step, in addition to format conversion
+* sort is more CPU intensive, could use multithreading here
+
+```python
+rule sam_to_bam:
+    input: "SRR2584857_1.x.ecoli-rel606.sam",
+    output: "SRR2584857_1.x.ecoli-rel606.bam",
+    shell: """
+        samtools view -b -F 4 {input} > {output}
+     """
+
+rule sort_bam:
+    input: "SRR2584857_1.x.ecoli-rel606.bam"
+    output: "SRR2584857_1.x.ecoli-rel606.bam.sorted"
+    shell: """
+        samtools sort {input} > {output}
+    """
+```
+
+## Calling variants
+
+Refactor - too many things!
+* split into three at least - gunzip, mpileup, call, view, filter?
+
+Discuss:
+* mpileup finds places with systematic differences
+* call outputs them subject to some default parameters
+* view converts bcf to vcf
+
+```python
+# 무시
+
+# ANCHOR: 다운로드
+
+rule download_data:
+    output: "SRR2584857_1.fastq.gz"
+    shell: """
+        curl -JLO https://osf.io/4rdza/download -o {output}
+    """
+
+rule download_genome:
+    output: "ecoli-rel606.fa.gz"
+    shell:
+        "curl -JLO https://osf.io/8sm92/download -o {output}"
+
+# ANCHOR_END: 다운로드
+
+# ANCHOR: 매핑
+
+rule map_reads:
+    input:
+        reads="SRR2584857_1.fastq.gz",
+        ref="ecoli-rel606.fa.gz"
+    output: "SRR2584857_1.x.ecoli-rel606.sam"
+    shell: """
+        minimap2 -ax sr {input.ref} {input.reads} > {output}
+    """
+
+# ANCHOR_END: 매핑
+
+# ANCHOR: sam_to_bam
+
+rule sam_to_bam:
+    input: "SRR2584857_1.x.ecoli-rel606.sam",
+    output: "SRR2584857_1.x.ecoli-rel606.bam",
+    shell: """
+        samtools view -b -F 4 {input} > {output}
+     """
+
+rule sort_bam:
+    input: "SRR2584857_1.x.ecoli-rel606.bam"
+    output: "SRR2584857_1.x.ecoli-rel606.bam.sorted"
+    shell: """
+        samtools sort {input} > {output}
+    """
+
+# ANCHOR_END: sam_to_bam
+
+# ANCHOR: 호출
+
+rule call_variants:
+    input:
+        ref="ecoli-rel606.fa.gz",
+        bam="SRR2584857_1.x.ecoli-rel606.bam.sorted",
+    output:
+        pileup="SRR2584857_1.x.ecoli-rel606.pileup",
+        ref="ecoli-rel606.fa",
+        bcf="SRR2584857_1.x.ecoli-rel606.bcf",
+        vcf="SRR2584857_1.x.ecoli-rel606.vcf",
+    shell: """
+        gunzip -k {input.ref}
+        bcftools mpileup -Ou -f {output.ref} {input.bam} > {output.pileup}
+        bcftools call -mv -Ob {output.pileup} -o {output.bcf}
+        bcftools view {output.bcf} > {output.vcf}
+    """
+
+# ANCHOR_END: 호출
+
+```
+
+## More TODO:
+
+* add additional files!
+* make this testable w/-n!
+* make this testable w/big!
+* remove test tags!
+* how to interpret output/what to do

@@ -1,5 +1,18 @@
-# Preface {.unnumbered}
+# 서문 {.unnumbered}
 
-This is a Quarto book.
+이 책은 생물정보학 연구자들을 위한 Snakemake 워크플로우 관리 시스템 입문서입니다.
 
-To learn more about Quarto books visit <https://quarto.org/docs/books>.
+## 이 책에 대하여
+
+Snakemake는 Python 기반의 워크플로우 관리 시스템으로, 복잡한 데이터 분석 파이프라인을 
+효율적이고 재현 가능하게 구성할 수 있도록 돕습니다.
+
+이 책은 [C. Titus Brown](https://github.com/ngs-docs) 등의 저작물을 기반으로 합니다.
+
+## 원본 소스
+
+원본 저장소: [ngs-docs/2023-snakemake-book-draft](https://github.com/ngs-docs/2023-snakemake-book-draft)
+
+## 라이선스
+
+이 저작물은 [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/) 에 따라 라이선스가 부여됩니다.

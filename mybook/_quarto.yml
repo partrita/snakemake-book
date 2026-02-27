@@ -4,14 +4,80 @@ project:
 
 book:
   title: "생물정보학을 위한 Snakemake 입문"
-  author: "partrita"
+  subtitle: "Draft: An Introduction to Snakemake for Bioinformatics"
+  author: "C. Titus Brown et al."
   date: today
   repo-url: https://github.com/partrita/snakemake-book
   repo-actions: [edit, issue]
+  cover-image: cover.png
+  favicon: cover.png
+  search: true
   chapters:
     - index.qmd
-    - intro.qmd
-    - summary.qmd
+    - chapters/intro.qmd
+    - chapters/acknowledgements.qmd
+    - part: "섹션 1 - Snakemake 단계별 소개"
+      chapters:
+        - chapters/ch00-setup.qmd
+        - chapters/ch01-first-workflow.qmd
+        - chapters/ch02-linking-rules.qmd
+        - chapters/ch03-avoiding-duplication.qmd
+    - part: "섹션 2 - 더욱 유용한 Snakefile 구축"
+      chapters:
+        - chapters/sec02-intro.qmd
+        - chapters/ch04-parallel-rules.qmd
+        - chapters/ch05-workflow-visualization.qmd
+        - chapters/ch06-wildcards.qmd
+        - chapters/ch07-filenames.qmd
+        - chapters/ch08-new-genomes.qmd
+        - chapters/ch09-expand.qmd
+        - chapters/ch10-default-rule.qmd
+        - chapters/ch11-final-snakefile.qmd
+    - part: "섹션 3 - 첫 번째 Snakefile 이후"
+      chapters:
+        - chapters/sec03-intro.qmd
+        - chapters/beginner-plus/input-output.qmd
+        - chapters/beginner-plus/wildcards.qmd
+        - chapters/beginner-plus/params.qmd
+        - chapters/beginner-plus/expand.qmd
+        - chapters/beginner-plus/targets.qmd
+        - chapters/beginner-plus/debugging.qmd
+        - chapters/beginner-plus/syntax.qmd
+        - chapters/beginner-plus/visualizing.qmd
+        - chapters/beginner-plus/string-formatting.qmd
+        - chapters/beginner-plus/config.qmd
+    - part: "섹션 3b - 전체 예제"
+      chapters:
+        - chapters/sec03b-intro.qmd
+        - chapters/complete/variant.qmd
+        - chapters/complete/assembly.qmd
+        - chapters/complete/rnaseq.qmd
+    - part: "섹션 4 - Snakemake 패턴 및 레시피"
+      chapters:
+        - chapters/recipes/subsampling.qmd
+        - chapters/recipes/splitting.qmd
+        - chapters/recipes/replacing-for.qmd
+        - chapters/recipes/never-fail.qmd
+        - chapters/recipes/params-functions.qmd
+    - part: "섹션 5 - 고급 기능"
+      chapters:
+        - chapters/sec05-intro.qmd
+        - chapters/advanced/parallel.qmd
+        - chapters/advanced/resources.qmd
+    - part: "섹션 6 - Snakemake 기능 참조 가이드"
+      chapters:
+        - chapters/sec06-intro.qmd
+        - chapters/reference/wildcard-constraints.qmd
+        - chapters/reference/namespaces.qmd
+    - part: "부록"
+      chapters:
+        - chapters/appendix/index.qmd
+        - chapters/appendix/unix-shell.qmd
+        - chapters/appendix/conda-and-mamba.qmd
+        - chapters/appendix/git-basics.qmd
+        - chapters/appendix/shell-scripts.qmd
+        - chapters/appendix/workflow-friendly-software.qmd
+        - chapters/appendix/python.qmd
     - references.qmd
 
 bibliography: references.bib
@@ -22,3 +88,7 @@ format:
     toc: true
     toc-depth: 3
     number-sections: true
+    number-depth: 3
+    code-fold: false
+    code-tools: true
+    highlight-style: github

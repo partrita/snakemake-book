@@ -1,45 +1,45 @@
-# 구성 파일 사용
+# 설정(Config) 파일 사용하기
 
-구성 파일은 워크플로의 _규칙_과 워크플로의 _구성_을 분리하는 데 사용할 수 있는 snakemake 기능입니다. 예를 들어, 여러 다른 샘플에 대해 동일한 시퀀스 트리밍 워크플로를 실행한다고 가정해 보겠습니다. 지금까지 본 기술로는 Snakefile을 매번 변경해야 합니다. 구성 파일을 사용하면 Snakefile을 동일하게 유지하고 새 샘플마다 다른 구성 파일을 제공하기만 하면 됩니다. 구성 파일은 특정 프로그램에 대한 매개변수를 정의하거나 기본 매개변수를 재정의하는 데에도 사용할 수 있습니다.
+설정 파일(configuration file)은 워크플로의 *규칙*과 워크플로의 *설정*을 분리할 때 유용한 Snakemake의 기능입니다. 예를 들어, 여러 샘플에 대해 동일한 시퀀싱 트리밍(trimming) 워크플로를 실행한다고 가정해 봅시다. 지금까지 배운 기술들로는 매번 샘플 이름을 직접 Snakefile에서 수정해야 할 것입니다. 하지만 설정 파일을 사용하면 Snakefile은 그대로 두고, 실행할 때마다 샘플 정보가 담긴 다른 설정 파일만 제공하면 됩니다. 설정 파일은 특정 프로그램의 파라미터를 정의하거나 기본값을 재정의하는 데에도 유용합니다.
 
-## 첫 번째 예 - 단일 샘플 ID로 규칙 실행
+## 첫 번째 예시: 단일 샘플 ID로 규칙 실행하기
 
-샘플 ID를 기반으로 출력 파일을 만드는 이 Snakefile을 고려하십시오. 여기서 샘플 ID는 구성 파일에서 가져와 `config`라는 Python 사전을 통해 제공됩니다.
+샘플 ID를 기반으로 출력 파일을 만드는 다음 Snakefile을 보십시오. 샘플 ID는 설정 파일에서 가져오며, `config`라는 이름의 Python 딕셔너리를 통해 제공됩니다.
+
 ```python
 configfile: "config.one_sample.yml"
 
-SAMPLE=config['sample']
+SAMPLE = config['sample']
 
 rule all:
     output:
         expand("one_sample.{s}.out", s=SAMPLE)
     shell:
         "touch {output}"
-
 ```
 
-기본 구성 파일은 `config.one_sample.yml`이며, `config['sample']`을 `XYZ_123` 값으로 설정하고 `one_sample.XYZ_123.out`을 만듭니다.
-```yml
+기본 설정 파일인 `config.one_sample.yml`의 내용은 다음과 같습니다. 여기서는 `sample` 값을 `XYZ_123`으로 설정하고 `one_sample.XYZ_123.out` 파일을 생성하도록 합니다.
+
+```yaml
 sample: XYZ_123
-
 ```
 
-그러나 Snakefile의 `configfile:` 지시문은 `--configfile`을 사용하여 명령줄에서 재정의할 수 있습니다. `config.one_sample_b.yml` 파일을 고려하십시오.
-```yml
+Snakefile에 적힌 `configfile:` 지시문은 명령줄에서 `--configfile` 옵션을 사용하여 재정의할 수 있습니다. `config.one_sample_b.yml` 파일이 다음과 같다고 합시다.
+
+```yaml
 sample: ABC_456
-
 ```
-이제 `snakemake -s snakefile.one_sample --configfile config.one_sample_b.yml -j 1`을 실행하면 샘플 값은 `ABC_456`으로 설정되고 `one_sample.ABC_456.out` 파일이 생성됩니다.
 
-(CTB: 적절한 출력 파일이 생성되었는지 확인하십시오.)
+이제 `snakemake --configfile config.one_sample_b.yml -j 1`을 실행하면 샘플 값이 `ABC_456`으로 설정되어 `one_sample.ABC_456.out` 파일이 생성됩니다.
 
-## 구성 파일에 여러 샘플 ID 지정
+## 설정 파일에 여러 샘플 ID 지정하기
 
-이전 예제는 한 번에 하나의 샘플만 처리하지만 YAML 목록을 사용하여 여러 개를 제공하지 못할 이유는 없습니다. 이 Snakefile, `snakefile.multi_samples`를 고려하십시오.
+여러 샘플을 처리할 때도 YAML의 리스트 형식을 사용하면 매우 간편합니다. `snakefile.multi_samples`라는 이름의 다음 예시를 보십시오.
+
 ```python
 configfile: "config.multi_samples.yml"
 
-SAMPLES=config['samples']
+SAMPLES = config['samples']
 
 rule all:
     input:
@@ -50,56 +50,38 @@ rule make_single_sample_wc:
         "one_sample.{s}.out"
     shell:
         "touch {output}"
-
 ```
 
-그리고 이 구성 파일, `config.multi_samples.yml`:
-```yml
+그리고 이와 짝을 이루는 `config.multi_samples.yml` 설정 파일입니다.
+
+```yaml
 samples:
 - DEF_789
 - GHI_234
 - JKL_567
-
 ```
 
-여기서는 더 복잡한 설정을 사용하여 여러 출력 파일을 만들고 있습니다.
+여기서는 몇 가지 중요한 개념이 함께 사용되었습니다.
 
-먼저 구성 파일의 `samples`를 사용합니다. `config['samples']` 값은 이전 샘플에서와 같이 Python 문자열이 아닌 Python 문자열 목록입니다. 이는 구성 파일이 `config.multi_samples.yml` 파일에서 `samples`를 목록으로 지정하기 때문입니다.
+먼저, 설정 파일의 `samples` 키 아래에 목록 형식으로 값들을 지정했습니다. 따라서 `config['samples']`는 Python의 리스트(list)가 됩니다.
 
-둘째, Snakefile에서 [와일드카드 규칙](wildcards.qmd)을 사용하는 것으로 전환했습니다. 왜냐하면 [여러 파일에 대해 하나의 규칙을 실행](wildcards.md#running-one-rule-on-many-files)하고 싶기 때문입니다. 이것은 많은 이점이 있습니다!
+둘째, [와일드카드 규칙](wildcards.qmd)을 사용하여 하나의 규칙으로 여러 파일을 생성하도록 했습니다.
 
-마지막으로, [단일 패턴과 하나의 값 목록으로 `expand` 함수를 사용하는](expand.md#using-expand-with-a-single-pattern-and-one-list-of-values) [기본 규칙](../ch10-default-rule.qmd)을 제공하여 와일드카드 규칙이 만들 출력 파일 목록을 구성합니다.
+마지막으로, [기본 규칙](../ch10-default-rule.qmd)에서 `expand` 함수를 사용하여 와일드카드 규칙이 생성해야 할 최종 파일들의 목록을 구성했습니다.
 
-이제 구성 파일에서 샘플 목록을 편집하거나 다른 샘플 목록이 있는 다른 구성 파일을 제공할 수 있습니다!
+이제 설정 파일의 샘플 목록만 편집하거나, 아예 다른 샘플 목록이 담긴 설정 파일을 제공하는 것만으로 워크플로를 유연하게 실행할 수 있습니다!
 
-## 구성 파일을 통해 입력 스프레드시트 지정
+## 설정 파일에 명령줄 파라미터 지정하기
 
-## 구성 파일에 명령줄 매개변수 지정
+설정 파일은 샘플 ID뿐만 아니라 거의 모든 정보를 담을 수 있습니다.
 
-구성 파일은 샘플 ID에만 국한되지 않습니다. 구성 파일에 거의 모든 것을 넣을 수 있습니다.
-
-[섹션 1](../ch00-setup.qmd)에서 개발한 워크플로에서 특정 k-mer 크기에서 게놈을 비교하는 `sourmash sketch` 명령을 고려하십시오. 예를 들어 [2장](../ch02-linking-rules.qmd)에서는 다음과 같습니다.
+예를 들어 게놈을 비교할 때 사용하는 `sourmash sketch` 명령의 k-mer 크기를 설정해 보겠습니다.
 
 ```python
 rule sketch_genomes:
     output:
        "GCF_000017325.1.fna.gz.sig",
        "GCF_000020225.1.fna.gz.sig",
-       "GCF_000021665.1.fna.gz.sig"
-    shell: """
-        sourmash sketch dna -p k=31 genomes/*.fna.gz --name-from-first
-    """
-```
-
-여기서 `sketch dna`는 매개변수 `-p k=31`로 실행되어 비교를 위한 k-mer 크기를 k=31로 설정합니다. 이것은 구성 파일에 적합한 후보입니다!
-
-[params 블록](params.qmd)과 구성 파일을 사용하여 이 규칙을 다음과 같이 다시 작성할 수 있습니다.
-```python
-rule sketch_genomes:
-    output:
-       "GCF_000017325.1.fna.gz.sig",
-       "GCF_000020225.1.fna.gz.sig",
-       "GCF_000021665.1.fna.gz.sig",
     params:
         ksize=config['ksize'],
     shell: """
@@ -107,95 +89,64 @@ rule sketch_genomes:
     """
 ```
 
-몇 가지 좋은 기능이 있습니다.
+이 방식의 장점은 다음과 같습니다.
+* `params` 블록을 사용함으로써 이것이 조정 가능한 매개변수임을 다른 사람에게 명확히 알릴 수 있습니다.
+* Snakefile 코드를 직접 건드리지 않고도 설정 파일만으로 k-mer 크기를 조절할 수 있습니다.
 
-* 'params'를 사용하면 이것이 매개변수임을 독자에게 명확하게 보여줍니다!
-* k-mer 크기를 구성할 수 있습니다!
+참고로, 설정 파일의 값이 정수인지 문자열인지 확인하거나 기본값을 제공하고 싶을 때는 Python의 `.get()` 메서드를 사용할 수도 있습니다. (예: `config.get('ksize', 31)`)
 
-CTB: k=21에서도 실제로 작동하는지 확인하십시오!
+## 설정 파일 디버깅하기
 
-CTB: config.get 및 int/유형 유효성 검사에 대해 이야기하십시오.
+Snakemake를 실행할 때 실제로 어떤 설정값이 적용되었는지 확인하고 싶을 때가 있습니다. 이럴 때는 Python의 `pprint` 모듈을 사용하면 편리합니다.
 
-CTB: 고급 사용법: compare에 대한 output=pdf와 같은 조건부 매개변수.
-
-참고/위험, 출력 파일 이름의 매개변수에 대한 정보가 필요할 수 있습니다...
-
-참고/위험, 구성 파일의 정보와 snakefile의 정보 간의 절충점에 대해 이야기하십시오. 예를 들어 실행할 프로그램과 사용할 매개변수입니다.
-
-## 구성 파일 디버깅 및 `config` 사전 표시
-
-snakemake를 실행할 때 구성이 실제로 무엇인지 알고 싶을 때가 많습니다. 이를 수행하는 편리한 방법은 `pprint`를 사용하는 것입니다. 예를 들어 `snakefile.multi_samples.pprint`를 참조하십시오.
 ```python
 import pprint
 
 configfile: "config.multi_samples.yml"
 
 # config 딕셔너리 출력
-print('config is:')
+print('적용된 설정(config):')
 pprint.pprint(config)
 
-SAMPLES=config['samples']
-
-# SAMPLES 변수 출력
-print('SAMPLES is:')
-pprint.pprint(SAMPLES)
+SAMPLES = config['samples']
 
 rule all:
     input:
         expand("one_sample.{s}.out", s=SAMPLES)
+...
+```
 
-rule make_single_sample_wc:
-    output:
-        "one_sample.{s}.out"
-    shell:
-        "touch {output}"
+실행하면 다음과 같이 딕셔너리 구조가 예쁘게 출력되어 어떤 값들이 로드되었는지 쉽게 확인할 수 있습니다.
 
 ```
-다음과 같은 출력을 생성합니다.
-```
-config is:
+적용된 설정(config):
 {'samples': ['DEF_789', 'GHI_234', 'JKL_567']}
-SAMPLES is:
-['DEF_789', 'GHI_234', 'JKL_567']
 ```
-
-CTB: 파이썬 dict/list를 설명하거나 링크하십시오.
-
-CTB: 디버깅에 링크하십시오.
-
-CTB: -n과 Python 문 대 규칙에 대해 이야기하십시오...
-
-print, pprint
-키
-
-.get/기본값 제공 사용
 
 ## 고급 사용법
 
-### 명령줄에서 구성 변수 제공
+### 명령줄에서 직접 설정값 제공하기
 
-명령줄에서 개별 구성 변수를 설정할 수도 있습니다.
+별도의 파일을 만들지 않고도 명령줄에서 특정 설정값을 바로 지정하거나 재정의할 수 있습니다.
 
+```bash
+snakemake -j 1 -C sample=ZZZ_123 ksize=21
 ```
-snakemake -j 1 -s snakefile.one_sample -C sample=ZZZ_123
-```
 
-CTB: 목록에 대해 이 작업을 수행하는 방법, 여러 구성 변수에 대해 이 작업을 수행하는 방법.
+`-C` (또는 `--config`) 옵션을 사용하면 설정 파일의 내용을 무시하거나 새로운 변수를 바로 주입할 수 있습니다.
 
-### 여러 구성 파일 제공
+### 여러 설정 파일 동시에 사용하기
 
-`--configfiles`
+`--configfiles` 옵션을 사용하면 여러 개의 YAML 파일을 동시에 제공할 수 있습니다. 파일들이 겹치는 키를 가지고 있다면 나중에 지정된 파일의 값이 우선합니다.
 
 ## 요약
 
-구성 파일을 사용하면 다음을 수행할 수 있습니다.
+설정 파일을 사용하면 다음의 이점을 얻을 수 있습니다.
+1. 워크플로 로직(Snakefile)과 실제 데이터 정보(Config)를 분리할 수 있습니다.
+2. 동일한 워크플로를 다양한 데이터셋에 쉽게 재사용할 수 있습니다.
+3. 소스 코드를 직접 수정하는 것보다 휴먼 에러를 줄일 수 있습니다.
+4. 팀원 간의 협업 시 설정값 공유가 쉬워집니다.
 
-* 워크플로에서 구성 분리
-* 동일한 워크플로에 대해 여러 다른 구성 파일 제공
-* Snakefile 대신 YML 파일을 편집하여 샘플 변경
-* 입력 구성 유효성 검사 용이 (논의)
-
-## 남은 것들
-
-* 공식 snakemake 문서 참조
-* YAML 및 JSON 구문 가이드
+## 참고 문서
+* [Snakemake 공식 문서 - Configuration](https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html)
+* YAML 및 JSON 문법 가이드

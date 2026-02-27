@@ -1,1 +1,1 @@
-# Section 5 - A Reference Guide for Snakemake Features
+# 섹션 6 - Snakemake 기능 참고 가이드

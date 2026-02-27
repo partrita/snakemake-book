@@ -57,7 +57,12 @@ Snakemake 버전이 셸 스크립트보다 이미 더 편리한 이유는,
 `shell:` 블록 앞에 `output:` 블록을 추가해 Snakemake에게 예상 출력 파일을 알려주면 됩니다:
 
 ```diff
-
+ rule compare_genomes:
+     message: "compare all input genomes using sourmash"
++    output:
++        "compare.mat.matrix.png"
+     shell: """
+         sourmash sketch dna -p k=31 genomes/*.fna.gz --name-from-first
 ```
 
 이제 `snakemake -j 1`을 처음 실행하면 명령들이 실행되지만,

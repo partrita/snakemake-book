@@ -1,41 +1,23 @@
-# A complete variant calling example for a bacterial genome
+# 세균 게놈의 변이 호출(Variant Calling) 전체 예시
 
-Here, we provide a simple introductory variant calling workflow
-for a bacterial genome. It assumes a haploid genome and it produces
-both unfiltered and quality-filtered variant calls. The workflow
-takes a single-ended read data set from the E. coli LTEE, and then:
+이 장에서는 세균 게놈을 위한 간단한 변이 호출 워크플로를 소개합니다. 이 워크플로는 단배체(haploid) 게놈을 가정하며, 필터링되지 않은 변이와 품질 필터링이 적용된 변이 호출 결과를 모두 생성합니다. 대장균(E. coli) LTEE 프로젝트의 싱글 엔드(single-end) 리드 데이터셋을 사용하여 다음 과정을 수행합니다.
 
-* uses minimap2 to align the reads to a reference genome and produce a SAM file;
-* converts the SAM file to a BAM file;
-* sorts and indexes the BAM file;
-* uses mpileup to generate a set of variant calls in a binary format;
-* converts the binary format into a text VCF file;
-* filters the calls based on coverage and quality.
+* **minimap2**를 사용하여 리드를 참조 게놈에 정렬하고 SAM 파일을 생성합니다.
+* SAM 파일을 BAM 파일로 변환합니다.
+* BAM 파일을 정렬(sort)하고 인덱싱(index)합니다.
+* **bcftools mpileup**을 사용하여 이진 형식의 변이 호출 세트를 생성합니다.
+* 이진 형식을 텍스트 형식의 VCF 파일로 변환합니다.
+* 커버리지(coverage)와 품질(quality)을 기준으로 변이를 필터링합니다.
 
-## The complete Snakefile
+## 전체 Snakefile
 
-TODO:
-- add final version of Snakefile!
+주요 규칙들이 포함된 Snakefile의 구성 요소를 단계별로 살펴보겠습니다.
 
-```python
+### 데이터 다운로드 규칙
 
-```
-
-## The annotated Snakefile
-
-### The download rules
-
-* no input, only output
-* curl retrieves files from the Web. useful for genome files etc. can use wget too.
-* for a real workflow with your own data, you would probably omit these
-  rules and instead save the data locally.
-* -o {output} makes sure that the right filename is respected.
+이 규칙들은 입력(input) 없이 출력(output)만 가집니다. `curl`을 사용하여 웹에서 직접 데이터를 가져오며, 참조 게놈이나 시퀀싱 데이터를 준비할 때 유용합니다.
 
 ```python
-# 무시
-
-# ANCHOR: 다운로드
-
 rule download_data:
     output: "SRR2584857_1.fastq.gz"
     shell: """
@@ -46,11 +28,13 @@ rule download_genome:
     output: "ecoli-rel606.fa.gz"
     shell:
         "curl -JLO https://osf.io/8sm92/download -o {output}"
+```
 
-# ANCHOR_END: 다운로드
+### 리드 매핑(Mapping)
 
-# ANCHOR: 매핑
+다운로드한 리드를 참조 게놈에 정렬합니다.
 
+```python
 rule map_reads:
     input:
         reads="SRR2584857_1.fastq.gz",
@@ -59,14 +43,16 @@ rule map_reads:
     shell: """
         minimap2 -ax sr {input.ref} {input.reads} > {output}
     """
+```
 
-# ANCHOR_END: 매핑
+### SAM에서 BAM으로 변환 및 정렬
 
-# ANCHOR: sam_to_bam
+SAM 파일을 효율적인 이진 형식인 BAM으로 변환하고 위치순으로 정렬합니다. 단계를 분리하면 나중에 병렬 처리를 설정하거나 오류 지점을 파악하기 더 쉽습니다.
 
+```python
 rule sam_to_bam:
-    input: "SRR2584857_1.x.ecoli-rel606.sam",
-    output: "SRR2584857_1.x.ecoli-rel606.bam",
+    input: "SRR2584857_1.x.ecoli-rel606.sam"
+    output: "SRR2584857_1.x.ecoli-rel606.bam"
     shell: """
         samtools view -b -F 4 {input} > {output}
      """
@@ -77,11 +63,13 @@ rule sort_bam:
     shell: """
         samtools sort {input} > {output}
     """
+```
 
-# ANCHOR_END: sam_to_bam
+### 변이 호출(Variant Calling)
 
-# ANCHOR: 호출
+정렬된 BAM 파일을 바탕으로 실제 변이 지점을 찾아냅니다. 
 
+```python
 rule call_variants:
     input:
         ref="ecoli-rel606.fa.gz",
@@ -97,193 +85,12 @@ rule call_variants:
         bcftools call -mv -Ob {output.pileup} -o {output.bcf}
         bcftools view {output.bcf} > {output.vcf}
     """
-
-# ANCHOR_END: 호출
-
 ```
 
-## Doing the initial mapping
+* `mpileup`: 참조 게놈과 리드 간의 체계적인 차이가 있는 지점을 찾습니다.
+* `call`: 통계적 모델을 적용하여 실제 변이를 판별하고 BCF 형식으로 출력합니다.
+* `view`: 분석이 용이하도록 이진 BCF 파일을 텍스트 VCF 파일로 변환합니다.
 
-```python
-# 무시
+## 요약 및 연습 문제
 
-# ANCHOR: 다운로드
-
-rule download_data:
-    output: "SRR2584857_1.fastq.gz"
-    shell: """
-        curl -JLO https://osf.io/4rdza/download -o {output}
-    """
-
-rule download_genome:
-    output: "ecoli-rel606.fa.gz"
-    shell:
-        "curl -JLO https://osf.io/8sm92/download -o {output}"
-
-# ANCHOR_END: 다운로드
-
-# ANCHOR: 매핑
-
-rule map_reads:
-    input:
-        reads="SRR2584857_1.fastq.gz",
-        ref="ecoli-rel606.fa.gz"
-    output: "SRR2584857_1.x.ecoli-rel606.sam"
-    shell: """
-        minimap2 -ax sr {input.ref} {input.reads} > {output}
-    """
-
-# ANCHOR_END: 매핑
-
-# ANCHOR: sam_to_bam
-
-rule sam_to_bam:
-    input: "SRR2584857_1.x.ecoli-rel606.sam",
-    output: "SRR2584857_1.x.ecoli-rel606.bam",
-    shell: """
-        samtools view -b -F 4 {input} > {output}
-     """
-
-rule sort_bam:
-    input: "SRR2584857_1.x.ecoli-rel606.bam"
-    output: "SRR2584857_1.x.ecoli-rel606.bam.sorted"
-    shell: """
-        samtools sort {input} > {output}
-    """
-
-# ANCHOR_END: sam_to_bam
-
-# ANCHOR: 호출
-
-rule call_variants:
-    input:
-        ref="ecoli-rel606.fa.gz",
-        bam="SRR2584857_1.x.ecoli-rel606.bam.sorted",
-    output:
-        pileup="SRR2584857_1.x.ecoli-rel606.pileup",
-        ref="ecoli-rel606.fa",
-        bcf="SRR2584857_1.x.ecoli-rel606.bcf",
-        vcf="SRR2584857_1.x.ecoli-rel606.vcf",
-    shell: """
-        gunzip -k {input.ref}
-        bcftools mpileup -Ou -f {output.ref} {input.bam} > {output.pileup}
-        bcftools call -mv -Ob {output.pileup} -o {output.bcf}
-        bcftools view {output.bcf} > {output.vcf}
-    """
-
-# ANCHOR_END: 호출
-
-```
-
-## Converting SAM to BAM
-
-* why do this separately rather than all in one?
-  * error messages get conflated if you do too many things
-  * good practice to separate things for parallel etc
-* filtering of unmapped reads in first step, in addition to format conversion
-* sort is more CPU intensive, could use multithreading here
-
-```python
-rule sam_to_bam:
-    input: "SRR2584857_1.x.ecoli-rel606.sam",
-    output: "SRR2584857_1.x.ecoli-rel606.bam",
-    shell: """
-        samtools view -b -F 4 {input} > {output}
-     """
-
-rule sort_bam:
-    input: "SRR2584857_1.x.ecoli-rel606.bam"
-    output: "SRR2584857_1.x.ecoli-rel606.bam.sorted"
-    shell: """
-        samtools sort {input} > {output}
-    """
-```
-
-## Calling variants
-
-Refactor - too many things!
-* split into three at least - gunzip, mpileup, call, view, filter?
-
-Discuss:
-* mpileup finds places with systematic differences
-* call outputs them subject to some default parameters
-* view converts bcf to vcf
-
-```python
-# 무시
-
-# ANCHOR: 다운로드
-
-rule download_data:
-    output: "SRR2584857_1.fastq.gz"
-    shell: """
-        curl -JLO https://osf.io/4rdza/download -o {output}
-    """
-
-rule download_genome:
-    output: "ecoli-rel606.fa.gz"
-    shell:
-        "curl -JLO https://osf.io/8sm92/download -o {output}"
-
-# ANCHOR_END: 다운로드
-
-# ANCHOR: 매핑
-
-rule map_reads:
-    input:
-        reads="SRR2584857_1.fastq.gz",
-        ref="ecoli-rel606.fa.gz"
-    output: "SRR2584857_1.x.ecoli-rel606.sam"
-    shell: """
-        minimap2 -ax sr {input.ref} {input.reads} > {output}
-    """
-
-# ANCHOR_END: 매핑
-
-# ANCHOR: sam_to_bam
-
-rule sam_to_bam:
-    input: "SRR2584857_1.x.ecoli-rel606.sam",
-    output: "SRR2584857_1.x.ecoli-rel606.bam",
-    shell: """
-        samtools view -b -F 4 {input} > {output}
-     """
-
-rule sort_bam:
-    input: "SRR2584857_1.x.ecoli-rel606.bam"
-    output: "SRR2584857_1.x.ecoli-rel606.bam.sorted"
-    shell: """
-        samtools sort {input} > {output}
-    """
-
-# ANCHOR_END: sam_to_bam
-
-# ANCHOR: 호출
-
-rule call_variants:
-    input:
-        ref="ecoli-rel606.fa.gz",
-        bam="SRR2584857_1.x.ecoli-rel606.bam.sorted",
-    output:
-        pileup="SRR2584857_1.x.ecoli-rel606.pileup",
-        ref="ecoli-rel606.fa",
-        bcf="SRR2584857_1.x.ecoli-rel606.bcf",
-        vcf="SRR2584857_1.x.ecoli-rel606.vcf",
-    shell: """
-        gunzip -k {input.ref}
-        bcftools mpileup -Ou -f {output.ref} {input.bam} > {output.pileup}
-        bcftools call -mv -Ob {output.pileup} -o {output.bcf}
-        bcftools view {output.bcf} > {output.vcf}
-    """
-
-# ANCHOR_END: 호출
-
-```
-
-## More TODO:
-
-* add additional files!
-* make this testable w/-n!
-* make this testable w/big!
-* remove test tags!
-* how to interpret output/what to do
+이 워크플로는 기본적인 변이 분석의 흐름을 잘 보여줍니다. 실제 연구에서는 여기에 중복 리드 제거(deduplication)나 더 엄격한 품질 필터링 규칙을 추가하여 성능을 높일 수 있습니다.

@@ -1,27 +1,12 @@
-# `params:` blocks and `{params}`
+# `params:` 블록과 `{params}`
 
-As we saw previously,
-[input and output blocks](input-and-output-blocks.qmd) are key to the
-way snakemake works: they let snakemake automatically connect rules
-based on the inputs necessary to create the desired output. However,
-input and output blocks are limited in certain ways: most specifically,
-every entry in both input and output blocks _must_ be a filename.
-And, because of the way snakemake works, the filenames specified in
-the input and output blocks must exist in order for the workflow to
-proceed past that rule.
+앞서 보았듯이, [입력 및 출력 블록](input-output.qmd)은 Snakemake가 작동하는 방식의 핵심입니다. 요청된 출력을 생성하는 데 필요한 입력을 바탕으로 Snakemake가 규칙을 자동으로 연결할 수 있게 해주기 때문입니다. 하지만 입력 및 출력 블록은 몇 가지 제약이 있습니다. 특히, 입력 및 출력 블록의 모든 항목은 반드시 *파일 이름*이어야 한다는 점입니다. 또한 Snakemake의 작동 방식상 입력 및 출력 블록에 지정된 파일 이름은 워크플로가 해당 규칙을 통과하기 위해 실제로 존재해야 합니다.
 
-Frequently, shell commands need to take parameters other than
-filenames, and these parameters may be values that can or should be
-calculated by snakemake.  Therefore, snakemake also supports a
-`params:` block that can be used to provide parameter strings that are _not_
-filenames in the shell block. As
-you'll see below, these can be used for a variety of purposes,
-including user-configurable parameters as well as parameters that can
-be calculated automatically by Python code.
+종종 셸 명령어는 파일 이름이 아닌 다른 파라미터를 받아야 할 때가 있으며, 이러한 파라미터는 Snakemake에 의해 계산될 수 있거나 계산되어야 하는 값일 수 있습니다. 따라서 Snakemake는 셸 블록에서 파일 이름이 *아닌* 파라미터 문자열을 제공할 수 있는 `params:` 블록도 지원합니다. 아래에서 보시겠지만, 이는 사용자 정의 파라미터뿐만 아니라 Python 코드로 자동 계산되는 파라미터 등 다양한 목적으로 사용될 수 있습니다.
 
-## A simple example of a params block
+## params 블록의 간단한 예시
 
-Consider:
+다음 코드를 살펴보세요.
 ```python
 rule use_params:
     params:
@@ -33,28 +18,16 @@ rule use_params:
 
 ```
 
-Here, the value `5` is assigned to the name `val` in the `params:` block,
-and is then available under the name `{params.val}` in the `shell:` block.
-This is analogous to [using keywords in input and output blocks](input-and-output-blocks.md#using-keywords-for-input-and-output-files), but unlike in
-input and output blocks, keywords _must_ be used in params blocks.
+여기서 값 `5`가 `params:` 블록의 `val`이라는 이름에 할당되었으며, 셸 블록에서 `{params.val}`이라는 이름으로 사용할 수 있습니다. 이는 [입력 및 출력 블록에서 키워드를 사용하는 방식](input-output.qmd#입력-및-출력-파일에-키워드-사용하기)과 유사하지만, 입력 및 출력 블록과 달리 params 블록에서는 키워드 사용이 *필수*입니다.
 
-In this example, there's no gain in functionality, but there is some
-gain in readability: the syntax makes it clear that `val` is a tunable
-parameter that can be modified without understanding the details of
-the shell block.
+이 예제에서는 기능적인 이득은 없지만 가독성 측면에서 이점이 있습니다. 이 구문은 `val`이 셸 블록의 세부 사항을 이해하지 않고도 수정할 수 있는 조정 가능한(tunable) 파라미터임을 명확하게 보여줍니다.
 
-## Params blocks have access to wildcards
+## params 블록은 와일드카드에 접근할 수 있습니다
 
-Just like the `input:` and `output:` blocks, wildcard values are
-directly available in `params:` blocks without using the `wildcards`
-prefix; for example, this means that you can use them in strings with
-the standard [string formatting operations](string-formatting.qmd).
+`input:` 및 `output:` 블록과 마찬가지로, 와일드카드 값은 `wildcards` 접두사 없이도 `params:` 블록에서 직접 사용할 수 있습니다. 즉, 표준 [문자열 서식 지정 작업](string-formatting.qmd)을 사용하여 문자열 내에서 와일드카드를 활용할 수 있습니다.
 
-This is useful when a shell command needs to use something other than
-the filename - for example, the `bowtie` read alignment software takes
-the _prefix_ of the output SAM file via `-S`, which means you cannot
-name the file correctly with `bowtie ... -S {output}`.  Instead, you
-could use `{params.prefix}` like so:
+이는 셸 명령어가 파일 이름이 아닌 다른 것을 사용해야 할 때 유용합니다. 예를 들어, `bowtie` 리드 정렬 소프트웨어는 `-S` 옵션을 통해 출력 SAM 파일의 *접두사*를 받는데, 이는 `bowtie ... -S {output}`으로는 정확한 파일 이름을 지정할 수 없음을 의미합니다. 대신 `{params.prefix}`를 다음과 같이 사용할 수 있습니다.
+
 ```python
 # 대상: -n
 
@@ -74,17 +47,17 @@ rule use_params:
 # ANCHOR_END: 내용
 
 ```
-If you were to use `-S {output}` here, you would end up producing a file
-`reads.sam.sam`!
 
-## Params blocks also support a variety of other functionality
+만약 여기서 `-S {output}`을 사용했다면, 결과적으로 `reads.sam.sam`이라는 파일이 생성되었을 것입니다!
 
-CTB expand here or later.
+## params 블록은 다양한 다른 기능도 지원합니다
 
-* bring in config values (mentioned in expand)
-* [input functions & params functions](../recipes/params-functions.qmd)
-* use comma-separated value for megahit as example? e.g. -r 1,2,3.
+(추후 확장 예정)
 
-## Links and references:
+* 설정(config) 값 가져오기
+* [입력 함수 및 params 함수](../recipes/params-functions.qmd)
+* 예제: megahit에서 `-r 1,2,3`과 같이 쉼표로 구분된 값 사용하기
 
-* Snakemake docs: [non-file parameters for rules](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#non-file-parameters-for-rules)
+## 링크 및 참고 자료:
+
+* Snakemake 문서: [규칙을 위한 파일이 아닌 파라미터(non-file parameters)](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#non-file-parameters-for-rules)

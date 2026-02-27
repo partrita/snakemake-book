@@ -1,31 +1,14 @@
-# `input:` and `output:` blocks
+# `input:` 및 `output:` 블록
 
-@@ make a note somewhere that these are annotations, not directives,
-and that's why we suggest using `{output}`.
+[챕터 2](../ch02-linking-rules.qmd)에서 보았듯이, Snakemake는 입력을 출력에 연결하여 규칙을 자동으로 "체인(chain)"화합니다. 즉, Snakemake는 여러 단계가 걸리더라도 원하는 출력을 생성하기 위해 *무엇을 실행할지* 스스로 파악합니다.
 
-@@ make a note saying that if it wants one output, it will run the rule.
+[챕터 3](../ch03-avoiding-duplication.qmd)에서는 Snakemake가 `input:` 및 `output:` 블록의 내용에 따라 셸 명령의 `{input}` 및 `{output}` 부분을 채우는 것을 확인했습니다. [챕터 6](../ch06-wildcards.qmd)에서 보았듯이 와일드카드를 사용하여 규칙을 일반화할 때, 와일드카드 값이 `{input}` 및 `{output}` 값으로 적절하게 치환되므로 이 기능은 더욱 유용해집니다.
 
-As we saw in [Chapter 2](../ch02-linking-rules.qmd), snakemake will automatically
-"chain" rules by connecting inputs to outputs. That is, snakemake
-will figure out _what to run_ in order to produce the desired output,
-even if it takes many steps.
+입력 및 출력 블록은 Snakemake 워크플로의 핵심 구성 요소입니다. 이번 장에서는 입력 및 출력 블록의 사용법을 좀 더 포괄적으로 살펴보겠습니다.
 
-In [Chapter 3](../ch03-avoiding-duplication.qmd), we also saw that snakemake will fill
-in `{input}` and `{output}` in the shell command based on the contents
-of the `input:` and `output:` blocks. This becomes even more useful
-when using wildcards to generalize rules, as shown in
-[Chapter 6](../ch06-wildcards.qmd), where wildcard values are properly
-substituted into the `{input}` and `{output}` values.
+## 입력 및 출력 제공하기
 
-Input and output blocks are key components of snakemake workflows.
-In this chapter, we will discuss the use of input and output blocks
-a bit more comprehensively.
-
-## Providing inputs and outputs
-
-As we saw previously, snakemake will happily take multiple input and
-output values via comma-separated lists and substitute them into strings
-in shell blocks.
+앞서 보았듯이, Snakemake는 쉼표로 구분된 리스트를 통해 여러 입력 및 출력 값을 기꺼이 받아들여 셸 블록의 문자열로 치환합니다.
 
 ```python
 rule example:
@@ -43,30 +26,16 @@ rule example:
 
 ```
 
-When these are substituted into shell commands with `{input}` and
-`{output}` they will be turned into space-separated ordered lists:
-e.g. the above shell command will print out first `file1.txt
-file2.txt` and then `output file1.txt output file2.txt` before using `touch` to
-create the empty output files.
+이 값들이 `{input}` 및 `{output}`을 통해 셸 명령어로 치환될 때, 공백으로 구분된 정렬된 리스트로 변환됩니다. 예를 들어, 위의 셸 명령은 먼저 `file1.txt file2.txt`를 출력하고 그 다음 `output file1.txt output file2.txt`를 출력한 후, `touch`를 사용하여 빈 출력 파일들을 생성합니다.
 
-In this example we are also asking snakemake to quote filenames for
-the shell command using `:q` - this means that if there are spaces,
-characters like single or double quotation marks, or other characters
-with special meaning they will be properly escaped using
-[Python's shlex.quote function](https://docs.python.org/3/library/shlex.html#shlex.quote).
-For example, here both output files contain a space, and so `touch
-{output}` would create three files -- `output`, `file1.txt`, and
-`file2.txt` -- rather than the correct two files, `output file1.txt`
-and `output file2.txt`.
+이 예제에서는 또한 `:q`를 사용하여 Snakemake에게 셸 명령어용 파일 이름을 따옴표로 감싸도록 요청하고 있습니다. 이는 파일 이름에 공백이나 작은따옴표, 큰따옴표 또는 기타 특수 문자가 포함된 경우 [Python의 shlex.quote 함수](https://docs.python.org/3/library/shlex.html#shlex.quote)를 사용하여 적절하게 이스케이프됨을 의미합니다. 예를 들어, 여기서 두 출력 파일 모두 공백을 포함하고 있으므로, 그냥 `touch {output}`을 사용하면 `output file1.txt`와 `output file2.txt`라는 정확한 두 파일이 아닌 `output`, `file1.txt`, `file2.txt`라는 세 개의 파일을 생성하게 됩니다.
 
-**Quoting filenames with `{...:q}` should always be used for anything
-executed in a shell block** - it does no harm and it can prevent
-serious bugs!
+**셸 블록에서 실행되는 모든 것에는 항상 `{...:q}`를 사용한 파일 이름 따옴표 감싸기를 사용해야 합니다.** 이는 해가 되지 않으며 심각한 버그를 예방할 수 있습니다!
 
-~~~admonish info title='Where can we (and should we) put commas?'
+::: {.callout-note}
+## 쉼표를 어디에 (그리고 어디에 넣어야) 할까요?
 
-In the above code example, you will notice that `"file2.txt"` and
-`"output file2.txt"` have commas after them:
+위의 코드 예제에서 `"file2.txt"`와 `"output file2.txt"` 뒤에 쉼표가 있는 것을 볼 수 있습니다.
 
 ```python
 rule example:
@@ -84,7 +53,7 @@ rule example:
 
 ```
 
-Are these required? **No.** The above code is equivalent to:
+이 쉼표들이 꼭 필요한가요? **아니오.** 위의 코드는 입력과 출력의 마지막 줄 뒤에 쉼표가 없는 아래 코드와 동일합니다.
 
 ```python
 rule example:
@@ -102,32 +71,16 @@ rule example:
 
 ```
 
-where there are no commas after the last line in input and output.
+일반적인 규칙은 이렇습니다. 리스트의 항목들을 구분하기 위해 내부 쉼표가 필요합니다. 그렇지 않으면 문자열들이 서로 이어지기 때문입니다. 즉, `"file1.txt" "file2.txt"`는 사이에 줄바꿈이 있더라도 `"file1.txtfile2.txt"`가 됩니다! 하지만 마지막 파일 이름 뒤에 붙는 쉼표는 선택 사항(무시됨)입니다.
 
-The general rule is this: you need internal commas to separate items
-in the list, because otherwise strings will be concatenated to each
-other - i.e. `"file1.txt" "file2.txt"` will become `"file1.txtfile2.txt"`,
-even if there's a newline between them! But a comma trailing after the
-last filename is optional (and ignored).
+왜 그럴까요? 이것들은 *Python 튜플(tuples)*이며, 원한다면 마지막에 쉼표를 추가할 수 있습니다. `a, b, c,`는 `a, b, c`와 동일합니다. 이 문법에 대한 자세한 내용은 [여기](../appendix/python.qmd)에서 읽어보실 수 있습니다.
 
-Why!?  These are _Python tuples_ and you can add a trailing comma if
-you like: `a, b, c,` is equivalent to `a, b, c`. You can read more
-about that syntax [here](../appendix/python.qmd) (CTB link to specific
-section).
+그런데 왜 마지막 쉼표를 추가할까요? 저는 마지막 쉼표를 사용하는 것을 추천합니다. 새로운 입력이나 출력을 추가할 때 쉼표 넣는 것을 잊어버리기 쉽기 때문인데, 저도 자주 하는 실수입니다! 이것은 흔한 실수를 방지하기 위해 선택적 문법 규칙을 사용하는 *방어적 프로그래밍(defensive programming)*의 작고 간단하지만 유용한 예입니다.
+:::
 
-So why do we add a trailing comma?! I suggest using trailing commas
-because it makes it easy to add a new input or output without
-forgetting to add a comma, and this is a mistake I make frequently!
-This is a (small and simple but still useful) example of _defensive
-programming_, where we can use optional syntax rules to head off common
-mistakes.
+## 입력 및 출력은 *정렬된 리스트*입니다
 
-~~~
-
-## Inputs and outputs are _ordered lists_
-
-We can also refer to individual input and output entries by using
-square brackets to index them as lists, starting with position 0:
+대괄호를 사용하여 리스트처럼 인덱싱함으로써(0번 위치부터 시작) 개별 입력 및 출력 항목을 참조할 수도 있습니다.
 
 ```python
 rule example:
@@ -141,17 +94,12 @@ rule example:
    """
 ```
 
-However, **we don't recommend this** because it's fragile. If you
-change the order of the inputs and outputs, or add new inputs, you
-have to go through and adjust the indices to match.  Relying on the
-number and position of indices in a list is error prone and will make
-your Snakefile harder to change later on!
+하지만 **이 방법은 권장하지 않습니다.** 부서지기 쉽기 때문입니다. 입력 및 출력의 순서를 변경하거나 새로운 입력을 추가하면, 매치되도록 인덱스를 일일이 조정해야 합니다. 리스트의 인덱스 번호와 위치에 의존하는 것은 실수가 발생하기 쉽고 나중에 Snakefile을 변경하기 어렵게 만듭니다!
 
-## Using keywords for input and output files
+## 입력 및 출력 파일에 키워드 사용하기
 
-You can also name specific inputs and outputs using the _keyword_
-syntax, and then refer to those using `input.` and `output.` prefixes.
-The following Snakefile rule does this:
+*키워드(keyword)* 문법을 사용하여 특정 입력 및 출력에 이름을 붙일 수 있으며, `input.` 및 `output.` 접두사를 사용하여 이를 참조할 수 있습니다. 다음 Snakefile 규칙이 그 예입니다.
+
 ```python
 rule example:
    input:
@@ -170,20 +118,12 @@ rule example:
 
 ```
 
-Here, `a` and `b` in the input block, and `a` and `c` in the output block,
-are keyword names for the input and output files; in the shell command,
-they can be referred to with `{input.a}`, `{input.b}`, `{output.a}`, and
-`{output.c}` respectively. Any valid variable name can be used, and the
-same name can be used in the input and output blocks without collision,
-as with `input.a` and `output.a`, above, which are distinct values.
+여기서 입력 블록의 `a`와 `b`, 그리고 출력 블록의 `a`와 `c`는 입력 및 출력 파일의 키워드 이름입니다. 셸 명령어에서는 각각 `{input.a}`, `{input.b}`, `{output.a}`, `{output.c}`로 참조할 수 있습니다. 유효한 변수 이름이라면 무엇이든 사용할 수 있으며, 위의 `input.a`와 `output.a`처럼 입력 및 출력 블록에서 동일한 이름을 충돌 없이 별개 값으로 사용할 수 있습니다.
 
-**This is our recommended way of referring to specific input and
-output files.** It is clearer to read, robust to rearrangements or
-additions, and (perhaps most importantly) can help guide the reader
-(including "future you") to the _purpose_ of each input and output.
+**이것이 특정 입력 및 출력 파일을 참조하는 저희의 권장 방식입니다.** 읽기에 더 명확하고, 재배열이나 추가에도 견고하며, (아마도 가장 중요하게는) 독자("미래의 당신" 포함)에게 각 입력 및 출력의 *목적*을 안내하는 데 도움이 됩니다.
 
-If you use the wrong keyword names in your shell code, you'll get an
-error message. For example, this code:
+셸 코드에서 잘못된 키워드 이름을 사용하면 오류 메시지가 나타납니다. 예를 들어, 아래 코드는:
+
 ```python
 # 실패 예상
 
@@ -199,21 +139,19 @@ rule example:
 # ANCHOR_END: 내용
 
 ```
-gives this error message:
+
+다음과 같은 오류 메시지를 출력합니다.
+
 ```
 AttributeError: 'InputFiles' object has no attribute 'z', when formatting the following:
 
        echo first input is {input.z:q}
-   
+    
 ```
 
-## Example: writing a flexible command line
+## 예시: 유연한 명령줄 작성하기
 
-One example where it's particularly useful to be able to refer to
-specific inputs is when running programs on files where the input
-filenames need to be specified as optional arguments.  One such
-program is the `megahit` assembler when it runs on paired-end input
-reads. Consider the following Snakefile:
+특정 입력을 참조할 수 있는 기능이 특히 유용한 예 중 하나는, 입력 파일 이름을 선택적 인자(optional arguments)로 지정해야 하는 프로그램을 실행할 때입니다. 그러한 프로그램 중 하나가 페어드엔드(paired-end) 입력 리드를 실행할 때의 `megahit` 어셈블러입니다. 다음 Snakefile을 살펴보세요.
 
 ```python
 # 대상: -n
@@ -237,15 +175,11 @@ rule assemble:
 
 ```
 
-In the shell command here, we need to supply the input reads as two
-separate files, with `-1` before one and `-2` before the second. As a
-bonus the resulting shell command is very readable!
+여기 셸 명령어에서 입력 리드를 두 개의 별개 파일로 제공해야 하며, 하나 앞에는 `-1`, 두 번째 앞에는 `-2`를 붙여야 합니다. 결과적으로 셸 명령어가 매우 읽기 쉬워진다는 장점도 있습니다!
 
-## Input functions and more advanced features
+## 입력 함수 및 고급 기능
 
-There are a number of more advanced uses of input and output that rely
-on Python programming - for example, one can define a Python function
-that is called to _generate_ a value dynamically, as below -
+Python 프로그래밍에 의존하는 좀 더 고급적인 입력 및 출력 사용법들이 있습니다. 예를 들어, 아래와 같이 동적으로 값을 *생성*하기 위해 호출되는 Python 함수를 정의할 수 있습니다.
 
 ```python
 # 대상: output5.txt
@@ -268,13 +202,10 @@ rule make_file:
 
 ```
 
-When asked to create `output5.txt`, this rule will look for
-`file25.txt` as an input.
+`output5.txt`를 생성하도록 요청받으면, 이 규칙은 `file25.txt`를 입력으로 찾게 됩니다.
 
-Since this functionality relies on knowledge of
-[wildcards](wildcards.qmd) as well as some knowledge of Python, we will
-defer discussion of it until later!
+이 기능은 Python 지식뿐만 아니라 [와일드카드](wildcards.qmd)에 대한 지식도 필요하므로, 자세한 논의는 나중으로 미루겠습니다!
 
-## References and Links
+## 참고 문헌 및 링크
 
-* [Snakemake manual section on rules](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#snakefiles-and-rules)
+* [규칙에 관한 Snakemake 매뉴얼 섹션](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#snakefiles-and-rules)

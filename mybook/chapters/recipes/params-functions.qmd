@@ -1,25 +1,17 @@
-# Subsetting FASTQ files to a fixed number of records.
+# 레시피: FASTQ 파일을 정해진 레코드 수로 시각화하기 (params 함수 활용)
 
-Level: intermediate
+난이도: 중급
 
-In [the subsampling files recipe](./subsampling-files.qmd), we
-showed how to output a file with a specific number of lines in it
-based only on the output filename. What if we want to sample a
-specific number of _records_ from a FASTQ file? To do this we
-need to transform the number of records in a wildcard into the number
-of lines.
+[파일 하위 샘플링 레시피](./subsampling.qmd)에서는 출력 파일 이름만을 기반으로 특정 줄 수만큼 파일을 생성하는 방법을 보여주었습니다. 만약 FASTQ 파일에서 특정 줄 수가 아니라 특정 **레코드(record)** 수를 샘플링하고 싶다면 어떻게 해야 할까요? FASTQ의 한 레코드는 4줄로 구성되므로, 와일드카드에 지정된 레코드 수를 실제 줄 수로 변환하는 과정이 필요합니다.
 
-To do this, snakemake supports functions in its `params:` blocks (ref
-CTB XXX params blocks). In the following recipe, we calculate the
-number of lines to sample based on the number of _records_ specified
-in the `num_records` wildcard:
+이를 위해 Snakemake는 `params:` 블록에서 Python 함수를 사용하는 것을 지원합니다. 다음 레시피에서는 `num_records` 와일드카드에 지정된 레코드 수를 기반으로 샘플링할 줄 수를 계산합니다.
 
 ```python
 def calc_num_lines(wildcards):
     # wildcards.num_records를 정수로 변환합니다.
     num_records = int(wildcards.num_records)
 
-    # 줄 수를 계산합니다 (레코드 * 4).
+    # 줄 수를 계산합니다 (레코드당 4줄).
     num_lines = num_records * 4
 
     return num_lines
@@ -38,28 +30,16 @@ rule subset:
     shell: """
         head -{params.num_lines} {input} > {output}
     """
-
 ```
 
-There are two special components here:
+여기에는 두 가지 특별한 구성 요소가 있습니다.
 
-* the Python function `calc_num_lines` takes a wildcards object as a
-  parameter, and calculates the number of lines to subset based on the
-  value of `wildcards.num_records`;
-* then, the `params:` block applies `calc_num_lines` to generate
-  `params.num_lines`, which can then be used in the shell command.
-  
-  
-References:
-* CTB params
-* CTB namespaces
-* CTB python code
+* Python 함수 `calc_num_lines`: `wildcards` 객체를 매개변수로 받아 `wildcards.num_records` 값을 기반으로 하위 샘플링할 줄 수를 계산합니다.
+* `params:` 블록: `calc_num_lines` 함수를 할당하여 `params.num_lines`를 생성합니다. 이렇게 생성된 값은 셸 명령에서 바로 사용할 수 있습니다.
 
-## Using lambda
+## 람다(lambda) 함수 사용하기
 
-The recipe above is pretty long - you can make a much shorter (but
-also harder to understand!) Snakefile using using anonymous "lambda"
-functions:
+위의 코드는 함수 정의 때문에 조금 길게 느껴질 수 있습니다. 무명 함수인 "람다(lambda)"를 사용하면 훨씬 짧고 간결한 Snakefile을 작성할 수 있습니다 (단, 가독성은 조금 떨어질 수 있습니다).
 
 ```python
 rule all:
@@ -76,9 +56,10 @@ rule subset:
     shell: """
         head -{params.num_lines} {input} > {output}
     """
-
 ```
 
-Here, `lambda` creates an anonymous function that takes a single parameter,
-`wildcards`, and returns the value of `wildcards.num_records` multipled by
-4.
+여기서 `lambda`는 `wildcards`라는 하나의 파라미터를 받아 `wildcards.num_records`에 4를 곱한 값을 반환하는 익명 함수를 생성합니다.
+
+참고 문서:
+* [Snakemake 공식 문서 - params 함수](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#non-file-parameters-for-rules)
+* Python의 람다(lambda) 기초

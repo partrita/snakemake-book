@@ -1,13 +1,8 @@
-# Using wildcards to generalize your rules
+# 와일드카드로 규칙 일반화하기
 
-As we showed in [Chapter 6](../ch06-wildcards.qmd), when you have repeated
-substrings between input and output, you can extract them into
-wildcards - going from a rule that makes specific outputs from
-specific inputs into rules that operate on any input/output sets that
-match a pattern.
+[챕터 6](../ch06-wildcards.qmd)에서 보았 듯이, 입력과 출력 사이에 반복되는 부분 문자열이 있는 경우 이를 와일드카드(wildcards)로 추출할 수 있습니다. 이를 통해 특정 입력에서 특정 출력을 만드는 규칙을 패턴과 일치하는 모든 입력/출력 세트에 작동하는 규칙으로 바꿀 수 있습니다.
 
-For example, the following code creates a single sourmash sketch
-from a specific genome:
+예를 들어, 다음 코드는 특정 게놈에서 하나의 sourmash 스케치를 생성합니다.
 
 ```python
 rule sketch_genomes_1:
@@ -20,7 +15,7 @@ rule sketch_genomes_1:
     """
 ```
 
-While this rule does the same for *any* genome ending in `.fna.gz`!
+반면, 아래 규칙은 `.fna.gz`로 끝나는 *어떤* 게놈에 대해서도 동일한 작업을 수행합니다!
 
 ```python
 rule sketch_genomes_1:
@@ -34,30 +29,21 @@ rule sketch_genomes_1:
     """
 ```
 
-Here, `{accession}` is a wildcard that "fills in" as needed for any filename
-that is under the `genomes/` directory and ends with `.fna.gz`.
+여기서 `{accession}`은 `genomes/` 디렉토리 아래에 있고 `.fna.gz`로 끝나는 모든 파일 이름에 대해 필요에 따라 "빈칸을 채우는" 와일드카드입니다.
 
-Snakemake uses simple _pattern matching_ to determine the value of
-`{accession}` - if asked for a filename ending in `.fna.gz.sig`, snakemake
-takes the prefix, and then looks for the matching input file
-`genomes/{accession}.fna.gz`, and fills in `{input}` accordingly.
+Snakemake는 단순한 *패턴 매칭*을 사용하여 `{accession}` 값을 결정합니다. `.fna.gz.sig`로 끝나는 파일 이름이 요청되면, Snakemake는 접두사를 가져와 일치하는 입력 파일 `genomes/{accession}.fna.gz`를 찾고 그에 따라 `{input}`을 채웁니다.
 
-Wildcards are incredibly useful and using them means that in many
-cases you can write a single rule that can generate hundreds or
-thousands of files! However, there are a few subtleties to consider. In
-this chapter, we're going to cover the most important of those
-subtleties, and provide links where you can learn more.
+와일드카드는 믿을 수 없을 정도로 유용하며, 이를 사용하면 하나의 규칙으로 수백 또는 수천 개의 파일을 생성할 수 있는 경우가 많습니다! 하지만 고려해야 할 몇 가지 미묘한 부분들이 있습니다. 이 장에서는 가장 중요한 미묘한 부분들을 다루고 자세한 내용을 배울 수 있는 링크를 제공하겠습니다.
 
-## Rules for wildcards
+## 와일드카드 기본 규칙
 
-First, let's go through some basic rules for wildcards.
+먼저 와일드카드의 몇 가지 기본 규칙을 살펴보겠습니다.
 
-### Wildcards are determined by the desired output
+### 와일드카드는 원하는 출력에 의해 결정됩니다
 
-The first and most important rule of wildcards is this: snakemake
-fills in wildcard values based on the filename it is asked to produce.
+와일드카드의 가장 중요하고 첫 번째 규칙은 이것입니다. Snakemake는 생성하도록 요청받은 파일 이름을 기반으로 와일드카드 값을 채웁니다.
 
-Consider the following rule:
+다음 규칙을 고려해 보세요.
 
 ```python
 # targets: result1.a.out
@@ -67,21 +53,13 @@ rule a:
     shell: "touch {output}"
 
 ```
-The wildcard in the output block will match _any_ file that ends with
-`.a.out`, and the associated shell command will create it!  This is both
-powerful and constraining: you can create any file with the suffix
-`.a.out` - but you also need to _ask_ for the file to be created.
 
-This means that in order to make use of this rule, there needs to be
-another rule that has a file that ends in `.a.out` as a required
-input.  (You can also explicitly ask for such a file on the command
-line. CTB doc link.)  There's no other way for snakemake to guess at
-the value of the wildcard: snakemake follows the dictum that explicit
-is better than implicit, and it will not guess at what files you want
-created.
+출력 블록의 와일드카드는 `.a.out`으로 끝나는 *어떤* 파일과도 일치하며, 관련 셸 명령어가 해당 파일을 생성할 것입니다! 이것은 강력하면서도 동시에 제약이기도 합니다. `.a.out` 접미사가 붙은 모든 파일을 생성할 수 있지만, 동시에 파일 생성을 *요청*해야 하기 때문입니다.
 
-For example, the above rule could be paired with another rule that asks
-for one or more filenames ending in `.a.out`:
+즉, 이 규칙을 활용하려면 `.a.out`으로 끝나는 파일을 필수 입력으로 갖는 또 다른 규칙이 있어야 합니다. (명령줄에서 해당 파일을 명시적으로 요청할 수도 있습니다.) Snakemake가 와일드카드 값을 추측할 다른 방법은 없습니다. Snakemake는 명시적인 것이 암시적인 것보다 낫다는 원칙을 따르며, 사용자가 어떤 파일을 생성하고 싶은지 추측하지 않습니다.
+
+예를 들어, 위의 규칙은 하나 이상의 `.a.out` 파일을 요청하는 다른 규칙과 짝을 이룰 수 있습니다.
+
 ```python
 rule make_me_a_file:
     input:
@@ -89,69 +67,45 @@ rule make_me_a_file:
         "result2.a.out",
 ```
 
-This also means that once you put a wildcard in a
-rule, you can no longer run that rule by the rule name - you have to
-ask for a filename, instead.  If you try to run a rule that contains a
-wildcard but don't tell it what filename you want to create, you'll get:
+또한 규칙에 와일드카드를 넣으면 더 이상 규칙 이름으로 해당 규칙을 실행할 수 없다는 뜻이기도 합니다. 대신 파일 이름을 요청해야 합니다. 와일드카드가 포함된 규칙을 실행하려 하면서 어떤 파일 이름을 생성하고 싶은지 알려주지 않으면 다음과 같은 오류가 발생합니다.
+
 ```
 Target rules may not contain wildcards.
 ```
 
-One common way to work with wildcard rules is to have another rule that
-uses `expand` to construct a list of desired files; this is often paired
-with a `glob_wildcards` to load a list of wildcards. See the recipe for
-renaming files by prefix, below, or the chapter on
-[Using `expand` to generate filenames](expand.qmd).
+와일드카드 규칙을 사용하는 흔한 방법 중 하나는 `expand`를 사용하여 원하는 파일 목록을 구성하는 다른 규칙을 두는 것입니다. 이는 종종 와일드카드 목록을 불러오는 `glob_wildcards`와 함께 사용됩니다. 아래의 접두사 기반 파일 이름 변경 레시피나 [파일 이름 생성을 위한 `expand` 사용](expand.qmd) 장을 참고하세요.
 
-### All wildcards used in a rule must match to wildcards in the `output:` block
+### 규칙에서 사용된 모든 와일드카드는 `output:` 블록의 와일드카드와 일치해야 합니다
 
-snakemake uses the wildcards in the `output:` block to fill in the wildcards
-elsewhere in the rule, so you can only use wildcards mentioned in one or
-more outputs.
+Snakemake는 규칙의 다른 부분에 있는 와일드카드를 채우기 위해 `output:` 블록의 와일드카드를 사용하므로, 하나 이상의 출력에 언급된 와일드카드만 사용할 수 있습니다.
 
-This means that every wildcard used in the `input:` block needs to be
-present in `output:`.  Consider the following example, where the input
-block contains a wildcard `analysis` that is not used in the output
-block:
+이는 `input:` 블록에서 사용되는 모든 와일드카드가 `output:`에도 있어야 함을 의미합니다. 입력 블록에는 `analysis` 와일드카드가 포함되어 있지만 출력 블록에는 사용되지 않는 다음 예시를 보십시오.
 
 ```python
-# this does not work:
+# 이 코드는 작동하지 않습니다:
 
 rule analyze_sample:
-    input: "{sample}.x.{analysis}.in"
-    output: "{sample}.out"
+   input: "{sample}.x.{analysis}.in"
+   output: "{sample}.out"
 ```
 
-This doesn't work because snakemake doesn't know how to fill in the
-`analysis` wildcard in the _input_ block, and you will get an error
-that says so:
+이것이 작동하지 않는 이유는 Snakemake가 *입력* 블록의 `analysis` 와일드카드를 어떻게 채워야 할지 모르기 때문이며, 다음과 같은 오류가 발생합니다.
+
 ```
 WildcardError in line 1 of ...
 Wildcards in input files cannot be determined from output files:
 'analysis'
 ```
 
-Think about it this way: if this worked, there could be multiple
-different input files for the same output, and snakemake would
-have no way to choose which input file to use to produce the
-desired output; moreover, the outputs would presumably be different
-depending on the inputs used, leading to irreproducibility.
+이렇게 생각해 보세요. 만약 이것이 작동한다면, 동일한 출력에 대해 여러 개의 다른 입력 파일이 존재할 수 있게 되고, Snakemake는 원하는 출력을 생성하기 위해 어떤 입력 파일을 사용해야 할지 선택할 방법이 없게 됩니다. 또한 사용된 입력에 따라 출력이 달라질 수 있어 재현성 문제로 이어질 수 있습니다.
 
-Every wildcard in the `input:` block does need to be in the `output:`
-block.  However, there are situations where wildcards in the `output:`
-block do _not_ need to be in the `input:` block - see "Using wildcards
-to determine parameters to use in the shell block", below, on using
-wildcards to determine parameters for the shell block!
+`input:` 블록의 모든 와일드카드는 `output:` 블록에 있어야 합니다. 하지만 `output:` 블록의 와일드카드가 `input:` 블록에 있을 필요가 없는 상황도 있습니다. 셸 블록의 파라미터를 결정하기 위해 와일드카드를 사용하는 방법에 대해서는 아래의 "셸 블록에서 사용할 파라미터를 결정하기 위한 와일드카드 사용" 섹션을 참고하세요!
 
-### Wildcards are local to each rule
+### 와일드카드는 각 규칙 내에서만 유효합니다
 
-Wildcard names only need to match _within_ a rule block; wildcards are not
-shared between rules. You _can_ use the same
-wildcard names in multiple rules for consistency and readability, but
-snakemake will treat them as independent wildcards, and wildcard values
-will not be shared.
+와일드카드 이름은 규칙 블록 *내에서만* 일치하면 됩니다. 와일드카드는 규칙 간에 공유되지 않습니다. 일관성과 가독성을 위해 여러 규칙에서 동일한 와일드카드 이름을 사용할 *수* 있지만, Snakemake는 이를 독립적인 와일드카드로 취급하며 와일드카드 값이 공유되지 않습니다.
 
-So, for example, these two rules use the same wildcard `a` in both rules -
+예를 들어, 아래 두 규칙은 모두 와일드카드 `a`를 사용합니다.
 
 ```python
 rule analyze_this:
@@ -163,8 +117,7 @@ rule analyze_that:
     output: "{a}.third.txt"
 ```
 
-but this is equivalent to these next two rules, which use _different_
-wildcards `a` and `b` in the separate rules:
+하지만 이것은 별개의 규칙에서 서로 다른 와일드카드 `a`와 `b`를 사용하는 다음 두 규칙과 동일합니다.
 
 ```python
 rule analyze_this:
@@ -173,45 +126,25 @@ rule analyze_this:
 
 rule analyze_that:
     input: "{b}.second.txt"
-    #        ^-- different - 'b' instead of 'a' in the first rule
+    #        ^-- 첫 번째 규칙의 'a' 대신 'b' 사용
     output: "{b}.third.txt"
-    #        ^-- different - 'b' instead of 'a' in the first rule
+    #        ^-- 첫 번째 규칙의 'a' 대신 'b' 사용
 ```
 
-There is one exception to the rule that wildcards are independent:
-when you use 
-[global wildcard constraints](../reference/wildcard-constraints.qmd) to
-limit wildcard matching by wildcard name, the constraints
-apply across all uses of that wildcard name in the Snakefile.
-However, the _values_ of the wildcards remain independent - it's just
-the constraint that is shared by all wildcards of the same name.
+와일드카드가 독립적이라는 규칙에는 한 가지 예외가 있습니다. [전역 와일드카드 제약(global wildcard constraints)](../reference/wildcard-constraints.qmd)을 사용하여 와일드카드 이름별로 매칭을 제한하는 경우, 해당 제약 조건은 Snakefile 내에서 해당 와일드카드 이름이 사용되는 모든 곳에 적용됩니다. 하지만 와일드카드 *값*은 여전히 독립적입니다. 단지 동일한 이름의 모든 와일드카드가 제약 조건을 공유할 뿐입니다.
 
-<!-- CTB: fix link to point directly to global wildcard constraints. -->
+와일드카드 값은 독립적이므로 모든 규칙에서 서로 다른 와일드카드를 쓸 수도 있지만, Snakefile 전체에서 동일한 의미를 갖도록 와일드카드를 선택하는 것이 좋은 관례입니다. 예를 들어 샘플 식별자에는 항상 일관되게 `sample`을 사용하고 데이터베이스 ID에는 `accession`을 사용하는 식입니다. 이렇게 하면 Snakefile을 읽기가 훨씬 쉬워집니다!
 
-While wildcards are independent in values and you could use different
-wildcards in every rule, it is a good convention to choose wildcards
-to have the same semantic meaning across the Snakefile - e.g. always
-use `sample` consistently to refer to a sample identifier, or `accession` to
-refer to a database ID. This makes reading the
-Snakefile easier!
+한 가지 흥미로운 부연 설명: 와일드카드는 각 규칙 내에서만 유효하기 때문에, 서로 다른 규칙에서 패턴의 서로 다른 부분을 매칭할 수도 있습니다! 아래의 "와일드카드 조합 및 매칭" 섹션을 참고하세요.
 
-One interesting addendum: because wildcards are local to each rule, you
-are free to match different parts of patterns in different rules!
-See "Mixing and matching wildcards", below.
+### 와일드카드 네임스페이스는 `input:` 및 `output:` 블록에서는 암시적으로 사용 가능하지만, 다른 블록에서는 그렇지 않습니다.
 
-### The wildcard namespace is implicitly available in `input:` and `output:` blocks, but not in other blocks.
-    
-Within the `input:` and `output:` blocks in a rule, you can refer to
-wildcards directly by name. If you want to use wildcards in most other
-parts of a rule you need to use the `wildcards` prefix; the only
-exception to this rule is `params:` blocks (see the chapter
-[`params:` blocks and `{params}`](params-blocks.qmd)). Here, `wildcards`
-is a _namespace_, which we will talk about more later. (CTB)
+규칙 내의 `input:` 및 `output:` 블록에서는 와일드카드를 이름으로 직접 참조할 수 있습니다. 규칙의 다른 대부분의 부분에서 와일드카드를 사용하려면 `wildcards` 접두사를 사용해야 합니다. 이 규칙의 유일한 예외는 `params:` 블록입니다 ([`params:` 블록과 `{params}`](params-blocks.qmd) 장 참고). 여기서 `wildcards`는 *네임스페이스(namespace)*이며, 이에 대해서는 나중에 더 자세히 이야기하겠습니다.
 
-Consider this Snakefile:
+다음 Snakefile을 고려해 보세요.
 
 ```python
-# this does not work:
+# 이 코드는 작동하지 않습니다:
 
 rule analyze_this:
     input: "{a}.first.txt"
@@ -219,13 +152,13 @@ rule analyze_this:
     shell: "analyze {input} -o {output} --title {a}"
 ```
 
-Here you will get an error,
+여기서 다음과 같은 오류가 발생합니다.
+
 ```
 NameError: The name 'a' is unknown in this context. Did you mean 'wildcards.a'?
 ```
 
-As the error suggests, you need to use `wildcards.a` in
-the shell block instead:
+오류 메시지에서 제안하듯이 셸 블록에서는 대신 `wildcards.a`를 사용해야 합니다.
 
 ```python
 rule analyze_this:
@@ -234,11 +167,9 @@ rule analyze_this:
     shell: "analyze {input} -o {output} --title {wildcards.a}"
 ```
 
-### Wildcards match as broadly as possible, unless constrained in some way
+### 와일드카드는 별도의 제약이 없는 한 가능한 한 넓게 매칭됩니다
 
-Wildcard pattern matching chooses the _longest possible_ match to
-_any_ characters, which can result in slightly confusing
-behavior. Consider:
+와일드카드 패턴 매칭은 *가장 긴 가능성*을 선택하므로 때로는 약간 혼란스러운 동작을 보일 수 있습니다. 다음을 고려해 보세요.
 
 ```python
 rule all:
@@ -252,12 +183,10 @@ rule something:
 
 ```
 
-In the `something` rule, for the desired output file `x.y.z.gz`,
-`{prefix}` will currently be `x.y` and `{suffix}` will be `z`.
-But it would be equally valid for `{prefix}` to be `x` and
-suffix to be `y.z`.
+`something` 규칙에서 원하는 출력 파일 `x.y.z.gz`에 대해, `{prefix}`는 현재 `x.y`가 되고 `{suffix}`는 `z`가 됩니다. 하지만 `{prefix}`가 `x`이고 `suffix`가 `y.z`가 되는 것도 똑같이 유효할 수 있습니다.
 
-A more extreme example shows the greedy matching even more clearly:
+더 극단적인 예시는 탐욕적 매칭(greedy matching)을 더 명확하게 보여줍니다.
+
 ```python
 rule all:
     input:
@@ -269,28 +198,22 @@ rule something:
     shell: "gzip -c {input} > {output}"
 
 ```
-where `{suffix}` is reduced down to a single character, `e`, and
-`{prefix}` is `longer_filenam`!
 
-Two simple rules for wildcard matching are:
-* all wildcards must match at least one character.
-* after that, wildcards will match _greedily_: each wildcard will match everything it can before the next wildcard is considered.
+여기서 `{suffix}`는 단일 문자 `e`로 줄어들고, `{prefix}`는 `longer_filenam`이 됩니다!
 
-This is why it's good practice to use
-[wildcard constraints](../reference/wildcard-constraints.qmd) to limit
-wildcard matching.  See "Constraining wildcards to avoid
-subdirectories and/or periods", below, for some examples, and see the
-[wildcard constraints](../reference/wildcard-constraints.qmd) chapter
-for more details!
+와일드카드 매칭의 두 가지 간단한 규칙은 다음과 같습니다.
+* 모든 와일드카드는 최소 한 글자 이상과 일치해야 합니다.
+* 그 후, 와일드카드는 *탐욕적으로* 매칭됩니다. 각 와일드카드는 다음 와일드카드가 고려되기 전에 가능한 모든 것을 매칭합니다.
 
-## Some examples of wildcards
+이것이 와일드카드 매칭을 제한하기 위해 [와일드카드 제약](../reference/wildcard-constraints.qmd)을 사용하는 것이 좋은 이유입니다. 아래의 "서브디렉토리 및/또는 마침표를 방지하기 위한 와일드카드 제한"에서 몇 가지 예시를 확인하고, 자세한 내용은 [와일드카드 제약](../reference/wildcard-constraints.qmd) 장을 참고하세요!
 
-### Running one rule on many files
+## 와일드카드 예시
 
-Wildcards can be used to run the same simple rule on many files - this is
-one of the simplest and most powerful uses for snakemake!
+### 여러 파일에서 하나의 규칙 실행하기
 
-Consider this Snakefile for compressing many files:
+와일드카드를 사용하여 동일하고 간단한 규칙을 많은 파일에 실행할 수 있습니다. 이는 Snakemake의 가장 간단하면서도 강력한 용도 중 하나입니다!
+
+많은 파일을 압축하기 위한 다음 Snakefile을 고려해 보세요.
 
 ```python
 rule all:
@@ -310,84 +233,44 @@ rule gzip_file:
 
 ```
 
-This Snakefile specifies a list of compressed files that it wants produced,
-and relies on wildcards to do the pattern matching required to find the
-input files and fill in the shell block.
+이 Snakefile은 생성하려는 압축 파일 목록을 지정하고, 입력 파일을 찾고 셸 블록을 채우는 데 필요한 패턴 매칭을 와일드카드에 의존합니다.
 
-See [Replacing for loops with Snakefiles](../recipes/replacing-for.qmd)
-for more examples of this powerful pattern!
+이 강력한 패턴에 대한 더 많은 예시는 [for 루프를 Snakefile로 대체하기](../recipes/replacing-for.qmd)를 참고하세요!
 
-That having been said, this Snakefile is inconvenient to write and is
-somewhat error prone:
+하지만 이 Snakefile은 작성하기 불편하고 실수할 가능성이 있습니다.
 
-* writing out the files individually is annoying if you have many of them!
-* to generate the list of files, you have to hand-rename them, which is
-  error prone!
-  
-Snakemake provides several features that can help with these issues. You
-can load the list of files from a text file or spreadsheet, or get the
-list directly from the directory using `glob_wildcards`; and you can
-use `expand` to rename them in bulk. Read on for some examples!
+* 파일이 많을 경우 일일이 나열하는 것은 번거롭습니다!
+* 파일 목록을 생성하기 위해 일일이 이름을 바꿔야 하는데, 이 과정에서 실수가 생길 수 있습니다!
+
+Snakemake는 이러한 문제를 도와줄 몇 가지 기능을 제공합니다. 텍스트 파일이나 스프레드시트에서 파일 목록을 로드하거나, `glob_wildcards`를 사용하여 디렉토리에서 직접 목록을 가져올 수 있습니다. 또한 `expand`를 사용하여 일괄적으로 이름을 바꿀 수도 있습니다. 아래 예시들을 계속해서 읽어보세요!
 
 ::: {.callout-note}
-## Why is this better than using gzip directly?
-It is possible to accomplish the same task by using `gzip -k original/*`,
-although you'd have to move the files into their final location, too.
+## 왜 이것이 gzip을 직접 사용하는 것보다 나은가요?
+`gzip -k original/*` 명령을 사용하고 파일을 최종 위치로 이동시켜서 동일한 작업을 수행할 수도 있습니다.
 
-How is using `gzip -k original/*` different from using snakemake? And
-is it better?
+`gzip -k original/*`을 사용하는 것과 Snakemake를 사용하는 것이 어떻게 다를까요? 그리고 더 나은가요?
 
-First, while the results aren't different - both approaches will
-compress the set of input files, which is what you want! - the `gzip
--k` command runs in *serial* and will not run in *parallel* - that is,
-gzip will by default compress one file at a time. The Snakefile will
-run the rule `gzip_file` _in parallel_, using as many processors as you
-specify with `-j`.  That means that if you had many, many such files -
-a common problem in bioinformatics! - the snakemake version could
-potentially run many times faster.
+첫째, 결과는 다르지 않습니다. 두 방식 모두 입력 파일 세트를 압축하며, 그것이 여러분이 원하는 결과입니다! 하지만 `gzip -k` 명령은 *순차적으로* 실행되며 *병렬로* 실행되지 않습니다. 즉, gzip은 기본적으로 한 번에 하나의 파일만 압축합니다. 반면 Snakefile은 `gzip_file` 규칙을 `-j`로 지정한 만큼의 프로세서를 사용하여 *병렬로* 실행합니다. 생물정보학에서 흔히 겪는 수많은 파일을 처리해야 하는 문제라면, Snakemake 버전이 잠재적으로 훨씬 더 빠르게 실행될 수 있습니다.
 
-Second, specifying many files on the command line with `gzip -k
-original/*` works with `gzip` but not with every shell command. Some
-commands only run on one file at a time; `gzip` just happens to work
-whether you give it one or many files. Many other programs do not work
-on multiple input files; e.g. the `fastp` program for preprocessing
-FASTQ files runs on one dataset at a time.  (It's also worth
-mentioning that snakemake gives you a way to flexibly write custom
-command lines; for some examples, see the chapter on
-[Input and Output Blocks](input-and-output-blocks.qmd).)
+둘째, 명령줄에서 `gzip -k original/*`로 많은 파일을 지정하는 것은 `gzip`에서는 작동하지만 모든 셸 명령어에서 다 작동하는 것은 아닙니다. 어떤 명령어는 한 번에 하나의 파일만 처리할 수 있습니다. `gzip`은 다행히 하나 이상의 파일을 주어도 잘 작동할 뿐입니다. 다른 많은 프로그램(예: FASTQ 파일 전처리를 위한 `fastp` 프로그램)은 한 번에 하나의 데이터셋에서만 실행됩니다. (Snakemake가 커스텀 명령줄을 유연하게 작성하는 방법을 제공한다는 점도 언급할 가치가 있습니다. 예시는 [입력 및 출력 블록](input-and-output-blocks.qmd) 장을 참고하세요.)
 
-Third, in the Snakefile we are being explicit about which files we
-expect to exist after the rules are run, while if we just ran `gzip -k
-original/*` we are asking the shell to compress every file in
-`original/`. If we accidentally deleted a file in the `original`
-subdirectory, then gzip would not know about it and would not
-complain - but snakemake would. This is a theme that will come up
-repeatedly - it's often safer to be really explicit about what files
-you expect, so that you can be alerted to possible mistakes.
+셋째, Snakefile에서는 규칙 실행 후 존재할 것으로 예상되는 파일을 명시적으로 지정하고 있습니다. 반면 셸에서 `gzip -k original/*`을 실행하면 `original/`에 있는 모든 파일을 압축하라고 요청하는 것입니다. 실수로 `original` 하위 디렉토리의 파일을 삭제했다면, gzip은 이를 알지 못하고 불평도 하지 않겠지만 Snakemake는 알려줄 것입니다. 이것은 반복해서 강조될 주제로, 예상되는 파일을 명확하게 지정하는 것이 가능한 실수를 경고받을 수 있어 종종 더 안전합니다.
 
-And, fourth, the Snakefile approach will let you rename the output
-files in interesting ways - with `gzip -k original/*`, you're stuck
-with the original filenames.  This is a feature we will explore in the
-next subsection!
+넷째, Snakefile 방식은 출력 파일의 이름을 흥미로운 방식으로 변경할 수 있게 해줍니다. `gzip -k original/*`를 사용하면 원래 파일 이름에 묶이게 됩니다. 이 기능은 다음 섹션에서 살펴보겠습니다!
 :::
 
-### Renaming files by prefix using `glob_wildcards`
+### `glob_wildcards`를 사용하여 접두사로 파일 이름 변경하기
 
-Consider a set of files named like so:
+`original/` 하위 디렉토리에 다음과 같이 이름이 지정된 파일 세트가 있다고 가정해 봅시다.
 
 ```
 F3D141_S207_L001_R1_001.fastq
 F3D141_S207_L001_R2_001.fastq
 ```
-within the `original/` subdirectory.
 
-Now suppose you want to rename them all to get rid of the `_001` suffix
-before `.fastq`. This is very easy with wildcards!
+이제 `.fastq` 앞의 `_001` 접미사를 제거하여 이름을 모두 변경하고 싶다고 가정해 보겠습니다. 와일드카드를 사용하면 매우 간단합니다!
 
-The below Snakefile uses `glob_wildcards` to load in a list of files from
-a directory and then make a copy of them with the new name under the
-`renamed/` subdirectory. Here, `glob_wildcards` extracts the `{sample}`
-pattern _from_ the set of available files in the directory:
+아래 Snakefile은 `glob_wildcards`를 사용하여 디렉토리에서 파일 목록을 로드한 다음, `renamed/` 하위 디렉토리에 새 이름으로 복사본을 만듭니다. 여기서 `glob_wildcards`는 디렉토리의 사용 가능한 파일 세트에서 `{sample}` 패턴을 추출합니다.
 
 ```python
 # 먼저, 이 형식의 파일 이름과 일치하는 항목을 찾습니다.
@@ -409,42 +292,19 @@ rule rename:
 
 ```
 
-This Snakefile also makes use of `expand` to rewrite the loaded list
-into the desired set of filenames. This means that we no
-longer have to write out the list of files ourselves - we can let
-snakemake do it! `expand` is discussed further in
-[Using expand to generate filenames](expand.qmd).
+이 Snakefile은 또한 로드된 목록을 원하는 파일 이름 세트로 다시 작성하기 위해 `expand`를 활용합니다. 이는 더 이상 파일 목록을 직접 일일이 쓸 필요 없이 Snakemake에게 맡길 수 있음을 의미합니다! `expand`에 대해서는 [파일 이름 생성을 위한 `expand` 사용](expand.qmd)에서 자세히 다룹니다.
 
-Note that here you could do a `mv` instead of a `cp` and then
-`glob_wildcards` would no longer pick up the changed files after
-running.
+여기서 `cp` 대신 `mv`를 사용할 수도 있는데, 그렇게 하면 `glob_wildcards`는 실행 후 변경된 파일을 더 이상 감지하지 못하게 됩니다.
 
-This Snakefile loads the list of files from the directory itself,
-which means that if an input file is accidentally deleted, snakemake
-won't complain. When renaming files, this is unlikely to cause
-problems; however, when running workflows, we recommend loading the
-list of samples from a text file or spreadsheet to avoid problems
+이 Snakefile은 디렉토리 자체에서 파일 목록을 로드하므로, 실수로 입력 파일을 삭제하더라도 Snakemake가 불평하지 않을 것입니다. 파일 이름을 변경할 때는 이것이 문제를 일으킬 가능성이 낮지만, 워크플로를 실행할 때는 문제를 피하기 위해 텍스트 파일이나 스프레드시트에서 샘플 목록을 로드하는 것을 권장합니다.
 
-<!-- (CTB point to a recipe). -->
+또한 이 Snakefile은 `original/`뿐만 아니라 모든 하위 디렉토리의 파일도 찾아 이름을 변경합니다! 이는 `glob_wildcards`가 기본적으로 모든 하위 디렉토리를 포함하기 때문입니다. 하위 디렉토리에서 로드하는 것을 방지하기 위해 와일드카드 제약을 사용하는 방법은 다음 섹션을 확인하세요.
 
-Also note that this Snakefile will find and rename all files in
-`original/` as well as any subdirectories! This is because
-`glob_wildcards` by default includes all subdirectories. See
-the next section below to see how to use wildcard constraints to
-prevent loading from subdirectories.
+### 서브디렉토리 및/또는 마침표를 방지하기 위한 와일드카드 제한
 
-### Constraining wildcards to avoid subdirectories and/or periods
+와일드카드는 '/'를 포함한 모든 문자열과 일치하므로, `glob_wildcards`는 자동으로 하위 디렉토리의 파일을 찾고 파일 이름의 '.' 이나 '-' 같은 일반적인 구분 기호와도 일치하도록 "확장"됩니다. 이를 흔히 "탐욕적 매칭"이라고 하며, 때때로 와일드카드가 원하는 것보다 훨씬 더 많은 파일 이름과 일치하게 된다는 것을 의미합니다! 와일드카드 제약을 사용하여 와일드카드 매칭을 제한할 수 있습니다.
 
-Wildcards match to any string, including '/', and so `glob_wildcards`
-will automatically find files in subdirectories and will also "stretch
-out" to match common delimiters in filenames such as '.' and '-'. This
-is commonly referred to as "greedy matching" and it means that
-sometimes your wildcards will match to far more of a filename than you
-want!  You can limit wildcard matches using wildcard constraints.
-
-Two common wildcard constraints are shown below, separately and in
-combination.  The first constraint avoids files in subdirectories, and
-the second constraint avoids periods.
+아래에는 두 가지 일반적인 와일드카드 제약 조건이 개발 및 조합되어 있습니다. 첫 번째 제약 조건은 하위 디렉토리의 파일을 피하고, 두 번째 제약 조건은 마침표를 피합니다.
 
 ```python
 # ANCHOR: 제약 조건
@@ -474,22 +334,15 @@ assert prefix_and_dir_only == ['file1']
 
 ```
 
-See [Wildcard constraints](../reference/wildcard-constraints.qmd) for more
-information and details.
+자세한 내용은 [와일드카드 제약](../reference/wildcard-constraints.qmd)을 참고하세요.
 
-## Advanced wildcard examples
+## 고급 와일드카드 예시
 
-### Renaming files using multiple wildcards
+### 여러 와일드카드를 사용한 파일 이름 변경
 
-The first renaming example above works really well when you want to change just
-the suffix of a file and can use a single wildcard, but if you want to
-do more complicated renaming you may have to use multiple wildcards.
+위의 첫 번째 파일 이름 변경 예시는 파일의 접미사만 변경하고 단일 와일드카드를 사용할 수 있을 때 매우 잘 작동하지만, 더 복잡한 이름 변경을 원할 경우 여러 개의 와일드카드를 사용해야 할 수도 있습니다.
 
-Consider the situation where you want to rename files from the form of
-`F3D141_S207_L001_R1_001.fastq` to `F3D141_S207_R1.fastq`. You can't
-do that with a single wildcard, unfortunately - but you can use two,
-like so:
-
+`F3D141_S207_L001_R1_001.fastq` 형식의 파일 이름을 `F3D141_S207_R1.fastq`로 변경하고 싶은 상황을 가정해 보겠습니다. 안타깝게도 단일 와일드카드로는 불가능하지만, 다음과 같이 두 개를 사용할 수 있습니다.
 
 ```python
 # 먼저, 이 형식의 파일 이름과 일치하는 항목을 찾습니다.
@@ -512,39 +365,24 @@ rule rename:
 
 ```
 
-We're making use of three new features in this code:
+이 코드에서 세 가지 새로운 기능을 사용하고 있습니다.
 
-First, `glob_wildcards` is matching multiple wildcards, and
-puts the resulting values into a single result variable (here, `files`).
+첫째, `glob_wildcards`가 여러 와일드카드를 매칭하고 결과 값을 하나의 결과 변수(여기서는 `files`)에 넣습니다.
 
-Second, the matching values are placed in two ordered lists,
-`files.sample` and `files.r`, such that values extracted from file names
-match in pairs.
+둘째, 매칭된 값들이 `files.sample` 및 `files.r`이라는 두 개의 정렬된 리스트에 배치되어 파일 이름에서 추출된 값들이 쌍으로 일치하게 됩니다.
 
-Third, when we use `expand`, we're asking it to "zip" the two lists of
-wildcards together, rather than the default, which is to make all
-possible combinations with `product`.  See
-[Using expand to generate filenames](expand.qmd) for more information
-on `zip` vs `product`.
+셋째, `expand`를 사용할 때 기본값인 `product`로 가능한 모든 조합을 만드는 대신, `zip`을 사용하여 두 와일드카드 리스트를 함께 묶도록 요청합니다. `zip`과 `product`에 대한 자세한 내용은 [파일 이름 생성을 위한 `expand` 사용](expand.qmd)을 참고하세요.
 
-Also - as with the previous example, this Snakefile will find and
-rename all files in `original/` as well as any subdirectories!
+또한 이전 예시와 마찬가지로, 이 Snakefile은 `original/`뿐만 아니라 모든 하위 디렉토리의 파일을 찾아 이름을 변경합니다!
 
-Links:
+링크:
+* [product 대신 zip을 사용하는 방법에 대한 snakemake 문서](https://snakemake.readthedocs.io/en/stable/project_info/faq.html#i-don-t-want-expand-to-use-the-product-of-every-wildcard-what-can-i-do)
 
-* [snakemake documentation on using zip instead of product](https://snakemake.readthedocs.io/en/stable/project_info/faq.html#i-don-t-want-expand-to-use-the-product-of-every-wildcard-what-can-i-do)
+### 문자열 조합 및 매칭
 
-### Mixing and matching strings
+와일드카드가 규칙에 국한된다는 점의 다소 비직관적이지만 매우 유용한 결과 중 하나는, 범용 규칙과 특정 규칙을 영리한 문자열 매칭을 통해 조합할 수 있다는 것입니다.
 
-A somewhat nonintuitive (but also very useful) consequence of wildcards
-being local to rules is that you can do clever string matching to mix and
-match generic rules with more specific rules.
-
-Consider this Snakefile, in which we are mapping reads from multiple
-samples to multiple references (rule `map_reads_to_reference`) as well
-as converting SAM to BAM files:
-
-<!-- CTB: transfer to functional Snakefile? -->
+여러 샘플의 리드를 여러 참조 게놈에 매핑하고(규칙 `map_reads_to_reference`), SAM을 BAM 파일로 변환하는 다음 Snakefile을 고려해 보세요.
 
 ```python
 rule all:
@@ -566,31 +404,20 @@ rule convert_sam_to_bam:
         "{filename}.sam"
     output:
         "{filename}.bam"
-    shell: "samtools view -b {input} -o {output}
+    shell: "samtools view -b {input} -o {output}"
 ```
 
-Here, snakemake is happily using different wildcards in each rule, and
-matching them to different parts of the pattern! So,
+여기서 Snakemake는 각 규칙에서 서로 다른 와일드카드를 즐겁게 사용하고 패턴의 서로 다른 부분에 매칭시키고 있습니다!
 
-* Rule `convert_sam_to_bam` will generically convert any SAM file to a BAM
-file based solely on the `.bam` and `.sam` suffixes.
+* 규칙 `convert_sam_to_bam`은 `.bam` 및 `.sam` 접미사만을 기반으로 모든 SAM 파일을 BAM 파일로 범용적으로 변환합니다.
 
-* However, `map_reads_to_references` will only produce mapping files that
-match the pattern of `{sample}.x.{reference}`, which in turn depend on the
-existence of  `{reference}.fa` and `{sample}.fastq`.
+* 하지만 `map_reads_to_references`는 `{sample}.x.{reference}` 패턴과 일치하는 매핑 파일만 생성하며, 이는 다시 `{reference}.fa` 및 `{sample}.fastq`의 존재 여부에 따라 달라집니다.
 
-This works because, ultimately, snakemake is just matching strings
-and does not "know" anything about the structure of the strings that
-it's matching. And it also doesn't remember wildcards across rules. So
-snakemake will happily match one set of wildcards in one rule, and a
-different set of wildcards in another rule!
+이것이 가능한 이유는 궁극적으로 Snakemake가 단지 문자열을 매칭할 뿐이며 매칭하는 문자열의 구조에 대해 아무것도 "알지" 못하기 때문입니다. 또한 규칙 간에 와일드카드를 기억하지도 않습니다. 따라서 Snakemake는 한 규칙에서 한 세트의 와일드카드를 매칭시키고, 다른 규칙에서 다른 세트의 와일드카드를 매칭시키는 일을 기꺼이 수행합니다!
 
-### Using wildcards to determine parameters to use in the shell block.
+### 셸 블록에서 사용할 파라미터를 결정하기 위한 와일드카드 사용
 
-You can also use wildcards to build rules that produce output files
-where the parameters used to _generate_ the contents are based on the
-filename; for example, consider this example of generating subsets
-of FASTQ files:
+와일드카드를 사용하여 규칙을 작성할 수도 있는데, 여기서 내용을 *생생*하기 위해 사용되는 파라미터가 파일 이름을 기반으로 결정되는 방식입니다. 예를 들어 FASTQ 파일의 서브셋을 생성하는 다음 예시를 보십시오.
 
 ```python
 rule all:
@@ -608,38 +435,18 @@ rule subset:
 
 ```
 
-Here, the wildcard is _only_ in the output filename, not in the
-input filename. The wildcard value is used by snakemake to determine
-how to fill in the number of lines for `head` to select from the file!
+여기서 와일드카드는 입력 파일 이름이 아닌 *출력* 파일 이름에만 있습니다. 와일드카드 값은 Snakemake가 파일에서 선택할 `head`의 줄 수를 채우는 데 사용됩니다!
 
-This can be really useful for generating files from giving many different
-parameters to a shell command - what we call "parameter sweeps".  More
-about this later!
+이는 셸 명령어에 다양한 파라미터를 제공하여 파일을 생성할 때 매우 유용할 수 있습니다. 저희는 이를 "파라미터 스윕(parameter sweeps)"이라고 부릅니다. 이에 대해서는 나중에 더 자세히 다루겠습니다!
 
-<!-- See CTB XXX.
+## 와일드카드에 대한 생각
 
-CTB link to:
-* params functions, params lambda?
-* parameter sweeps with this and expand
--->
+와일드카드(`expand` 및 `glob_wildcards`와 함께)는 Snakemake에서 가장 강력하고 유용한 기능 중 하나입니다. 단순한 패턴에 전적으로 기반하여 임의의 수의 파일에 규칙을 범용적으로 적용할 수 있게 해줍니다.
 
-## How to think about wildcards
+하지만 그 강력함 뒤에는 꽤 많은 복잡성이 따릅니다!
 
-Wildcards (together with `expand` and `glob_wildcards`) are among
-the most powerful and useful features in snakemake: they permit generic
-application of rules to an arbitrary number of files, based entirely
-on simple patterns.
+궁극적으로 와일드카드는 모두 *문자열*과 *패턴*에 관한 것입니다. Snakemake는 패턴 매칭을 사용하여 원하는 출력 파일에서 패턴을 추출한 다음, 규칙의 다른 곳에 해당 매칭 결과를 채워 넣습니다. 그 과정에서 발생하는 대부분의 복잡성은 패턴 매칭 및 채우기에서의 모호함을 피하는 것과, 실제로 생성하려는 모든 파일의 이름을 구성하는 과제에서 비롯됩니다.
 
-However, with that power comes quite a bit of complexity!
+## 추가 참고 자료
 
-Ultimately, wildcards are all about *strings* and *patterns*.
-Snakemake is using pattern matching to extract patterns from the
-desired output files, and then filling those matches in elsewhere in
-the rule. Most of the ensuing complexity comes avoiding ambiguity in
-matching and filling in patterns, along with the paired challenge of
-constructing all the names of the files you actually want to create.
-
-## Additional references
-
-See also: the
-[snakemake docs on wildcards](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#snakefiles-wildcards).
+참고: [와일드카드에 관한 Snakemake 문서](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#snakefiles-wildcards)

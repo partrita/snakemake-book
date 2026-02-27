@@ -1,11 +1,8 @@
-# Using `expand` to generate filenames
+# `expand`를 사용하여 파일 이름 생성하기
 
-[Snakemake wildcards](./wildcards.qmd) make it easy to apply rules to
-many files, but also create a new challenge: how do you generate all the
-filenames you want?
+[Snakemake 와일드카드](./wildcards.qmd)는 많은 파일에 규칙을 쉽게 적용할 수 있게 해주지만, 동시에 새로운 과제를 안겨줍니다. 바로 여러분이 원하는 모든 파일 이름을 어떻게 생성할 것인가 하는 점입니다.
 
-As an example of this challenge, consider the list of genomes needed
-for rule `compare_genomes` from [Chapter 8](../ch08-new-genomes.qmd) - 
+이러한 과제의 예로, [챕터 8](../ch08-new-genomes.qmd)의 `compare_genomes` 규칙에 필요한 게놈 목록을 생각해 보십시오.
 
 ```python
 rule compare_genomes:
@@ -16,20 +13,12 @@ rule compare_genomes:
         "GCF_008423265.1.fna.gz.sig",
 ```
 
-This list is critical because it specifies the sketches to be created
-by the wildcard rule. However, writing this list out is annoying and
-error prone, because parts of every filename are identical and
-repeated.
+이 목록은 와일드카드 규칙에 의해 생성될 스케치들을 지정하기 때문에 매우 중요합니다. 하지만 파일 이름의 일부가 동일하고 반복되기 때문에 이 목록을 일일이 작성하는 것은 번거롭고 실수가 발생하기 쉽습니다.
 
-Even worse, if you needed to use this list in multiple places, or
-produce slightly different filenames with the same accessions, that
-will be error prone: you are likely to want to add, remove, or edit
-elements of the list, and you will need to change it in multiple
-places.
+더 나쁜 것은, 이 목록을 여러 곳에서 사용해야 하거나 동일한 접근 번호로 약간 다른 파일 이름을 만들어야 하는 경우입니다. 목록의 요소를 추가, 삭제 또는 편집하고 싶을 때 여러 곳을 변경해야 하므로 실수가 생길 가능성이 큽니다.
 
-In [Chapter 9](../ch09-expand.qmd), we showed how to change this to a list of the
-accessions at the top of the Snakefile and then used a function called
-`expand` to generate the list:
+[챕터 9](../ch09-expand.qmd)에서는 이를 Snakefile 상단의 접근 번호 리스트로 바꾸고 `expand`라는 함수를 사용하여 목록을 생성하는 방식을 보여드렸습니다.
+
 ```python
 ACCESSIONS = ["GCF_000017325.1",
               "GCF_000020225.1",
@@ -44,39 +33,35 @@ rule compare_genomes:
 
 ```
 
-Using `expand` to generate lists of filenames is a common pattern in
-Snakefiles, and in this chapter we'll explore it more!
+`expand`를 사용하여 파일 이름 목록을 생성하는 것은 Snakefile에서 흔히 볼 수 있는 패턴입니다. 이번 장에서 좀 더 자세히 살펴보겠습니다!
 
-## Using `expand` with a single pattern and one list of values
+## 단일 패턴과 하나의 값 리스트로 `expand` 사용하기
 
-In the example above, we provide a single pattern, `{acc}.fna.gz.sig`,
-and ask `expand` to resolve it into many filenames by filling in values for
-the field name `acc` from each element in `ACCESSIONS`. (You may recognize
-the keyword syntax for specifying values, `acc=ACCESSIONS`, from
-[input and output blocks](input-and-output-blocks.qmd).)
+위의 예제에서 우리는 `{acc}.fna.gz.sig`라는 단일 패턴을 제공하고, `ACCESSIONS`의 각 요소에서 `acc`라는 필드 이름을 채워 여러 파일 이름으로 풀도록 `expand`에 요청했습니다. ([입력 및 출력 블록](input-output.qmd)에서 값을 지정하기 위한 키워드 구문인 `acc=ACCESSIONS`를 보셨을 것입니다.)
 
-The result of `expand('{acc}.fna.gz.sig', acc=...)` here is
-_identical_ to writing out the four filenames in long form:
+여기서 `expand('{acc}.fna.gz.sig', acc=...)`의 결과는 파일 이름 네 개를 긴 형식으로 적는 것과 *완전히 동일*합니다.
+
 ```
 "GCF_000017325.1.fna.gz.sig",
 "GCF_000020225.1.fna.gz.sig",
 "GCF_000021665.1.fna.gz.sig",
 "GCF_008423265.1.fna.gz.sig"
 ```
-That is, `expand` doesn't do any special wildcard matching or pattern
-inference - it just fills in the values and returns the resulting list.
 
-Here, `ACCESSIONS` can be any Python _iterable_ - for example a list, a tuple, 
-or a dictionary.  See the [Python appendix](../appendix/python.qmd) for
-details.
+즉, `expand`는 특별한 와일드카드 매칭이나 패턴 추론을 수행하지 않습니다. 단지 값을 채워 넣고 결과 리스트를 반환할 뿐입니다.
 
-## Using `expand` with multiple lists of values
+여기서 `ACCESSIONS`는 리스트, 튜플 또는 딕셔너리와 같은 모든 Python *반복 가능한 객체(iterable)*가 될 수 있습니다. 자세한 내용은 [Python 부록](../appendix/python.qmd)을 참고하세요.
 
-You can also use `expand` with multiple field names. Consider:
+## 여러 값 리스트로 `expand` 사용하기
+
+여러 필드 이름과 함께 `expand`를 사용할 수도 있습니다. 다음을 고려해 보세요.
+
+```python
+expand('{acc}.fna.{extension}', acc=ACCESSIONS, extension=['.gz.sig', '.gz'])
 ```
-expand('{acc}.fna.{extension}`, acc=ACCESSIONS, extension=['.gz.sig', .gz'])
-```
-This will produce the following eight filenames:
+
+이것은 제공된 패턴에 `acc`와 `extension`의 *가능한 모든 조합*을 대입하여 다음과 같은 8개의 파일 이름을 생성합니다.
+
 ```
 "GCF_000017325.1.fna.gz.sig",
 "GCF_000017325.1.fna.gz",
@@ -87,13 +72,11 @@ This will produce the following eight filenames:
 "GCF_008423265.1.fna.gz.sig",
 "GCF_008423265.1.fna.gz"
 ```
-by substituting _all possible_ combinations of `acc` and `extension` into
-the provided pattern.
 
-## Generating _all_ combinations vs _pairwise_ combinations
+## 모든 조합 생성 vs 쌍별(pairwise) 조합 생성
 
-As we saw above, with multiple patterns, `expand` will generate all
-possible combinations: that is,
+위에서 보았듯이, 여러 패턴이 있는 경우 `expand`는 가능한 모든 조합을 생성합니다. 즉:
+
 ```python
 # 대상: -n all_product all_zip all_zip_short
 
@@ -135,29 +118,20 @@ rule create:
         touch("{x}.by.{y}")
 
 ```
-will generate 9 filenames: `1.by.a`, `1.by.b`, `1.by.c`, `2.by.a`, etc.
-And if you added a third pattern to the `expand` string, `expand` would
-also add that into the combinations!
 
-So what's going on here?
+이는 `1.by.a`, `1.by.b`, `1.by.c`, `2.by.a` 등 9개의 파일 이름을 생성합니다. 만약 `expand` 문자열에 세 번째 패턴을 추가한다면, `expand`는 그것 역시 조합에 추가할 것입니다!
 
-By default, expand does an all-by-all expansion containing all
-possible combinations. (This is sometimes
-called a Cartesian product, a cross-product, or an outer join.)
+어떻게 이런 일이 일어나는 걸까요?
 
-But you don't always want that. How can we change this behavior?
+기본적으로 `expand`는 가능한 모든 조합을 포함하는 "all-by-all" 확장을 수행합니다. (이를 데카르트 곱(Cartesian product), 교차 곱(cross-product) 또는 외부 조인(outer join)이라고도 부릅니다.)
 
-The `expand` function takes an optional second argument, the
-combinator, which tells `expand` how to combine the lists of values
-the come after. By default `expand` uses a Python function called
-`itertools.product`, which creates all possible combinations, but you
-can give it other functions.
+하지만 항상 그런 방식을 원하는 것은 아닙니다. 이 동작을 어떻게 바꿀 수 있을까요?
 
-In particular, you can tell `expand` to create pairwise combinations
-by using `zip` instead - something we did in one of the
-[wildcard examples](wildcards.qmd).
+`expand` 함수는 선택적으로 두 번째 인자인 결합자(combinator)를 받는데, 이는 뒤따르는 값 리스트들을 어떻게 결합할지 `expand`에 알려줍니다. 기본적으로 `expand`는 가능한 모든 조합을 만드는 Python 함수인 `itertools.product`를 사용하지만, 다른 함수를 지정할 수 있습니다.
 
-Here's an example:
+특히, `product` 대신 `zip`을 사용하여 쌍별(pairwise) 조합을 생성하도록 `expand`에 지시할 수 있습니다. 이는 [와일드카드 예시](wildcards.qmd) 중 하나에서 이미 수행했던 작업입니다.
+
+다음은 그 예시입니다:
 
 ```python
 X = [1, 2, 3]
@@ -167,14 +141,13 @@ rule all_zip:
    input:
       expand('{x}.by.{y}', zip, x=X, y=Y)
 ```
-which will now generate only three filenames: `1.by.a`, `2.by.b`, and `3.by.c`.
 
-The big caveat here is that `zip` will create an output list the length
-of the shortest input list - so if you give it one list of three elements,
-and one list of two elements, it will only use two elements from the first
-list.
+이제 `1.by.a`, `2.by.b`, `3.by.c` 단 세 개의 파일 이름만 생성됩니다.
 
-For example, in the `expand` in this `Snakefile`,
+여기서 주의할 점은 `zip`이 가장 짧은 입력 리스트의 길이에 맞춰 출력 리스트를 만든다는 것입니다. 따라서 요소가 세 개인 리스트 하나와 요소가 두 개인 리스트 하나를 주면, 첫 번째 리스트에서 두 개의 요소만 사용하게 됩니다.
+
+예를 들어, 이 Snakefile의 `expand`에서:
+
 ```python
 X = [1, 2, 3]
 Y = ['a', 'b']
@@ -183,47 +156,39 @@ rule all_zip_short:
    input:
       expand('{x}.by.{y}', zip, x=X, y=Y)
 ```
-only `1.by.a` and `2.by.b` will be generated, as there is no partner
-for `3` in the second list.
 
-For more information see the [snakemake documentation on using zip instead of product](https://snakemake.readthedocs.io/en/stable/project_info/faq.html#i-don-t-want-expand-to-use-the-product-of-every-wildcard-what-can-i-do).
+두 번째 리스트에 `3`에 대응하는 짝이 없기 때문에 `1.by.a`와 `2.by.b`만 생성됩니다.
 
-## Getting a list of identifiers to use in `expand`
+자세한 내용은 [product 대신 zip을 사용하는 방법에 관한 snakemake 문서](https://snakemake.readthedocs.io/en/stable/project_info/faq.html#i-don-t-want-expand-to-use-the-product-of-every-wildcard-what-can-i-do)를 참고하세요.
 
-The `expand` function provides an effective solution when you have
-lists of identifiers that you use multiple times in a workflow - a common
-pattern in bioinformatics!  Writing these lists out in a Snakefile
-(as we do in the above examples) is not always practical, however;
-you may have dozens to hundreds of identifiers!
+## `expand`에서 사용할 식별자 목록 가져오기
 
-Lists of identifiers can be loaded from _other_ files in a variety of
-ways, and they can also be generated from the set of actual files in
-a directory using `glob_wildcards`.
+`expand` 함수는 워크플로에서 여러 번 사용하는 식별자 목록이 있을 때 효과적인 솔루션을 제공합니다. 이는 생물정보학에서 매우 흔한 패턴입니다! 하지만 위의 예시들처럼 Snakefile에 이 목록들을 일일이 적는 것이 항상 실용적인 것은 아닙니다. 수십에서 수백 개의 식별자가 있을 수 있기 때문입니다!
 
-## Examples of loading lists of accessions from files or directories
+식별자 목록은 다양한 방식으로 *다른* 파일에서 로드할 수 있으며, `glob_wildcards`를 사용하여 디렉토리의 실제 파일 세트로부터 생성할 수도 있습니다.
 
-### Loading a list of accessions from a text file
+## 파일 또는 디렉토리에서 접근 번호 목록을 로드하는 예시
 
-If you have a simple list of accessions in a text file
-`accessions.txt`, like so:
+### 텍스트 파일에서 접근 번호 목록 불러오기
 
-File `accessions.txt`:
+`accessions.txt`라는 텍스트 파일에 다음과 같이 간단한 접근 번호 목록이 있다면:
+
+`accessions.txt` 파일 내용:
 ```
 GCF_000017325.1
 GCF_000020225.1
 GCF_000021665.1
 GCF_008423265.1
-
 ```
 
-then the following code will load each line in the text file in as a separate
-ID:
+다음 코드는 텍스트 파일의 각 줄을 별개의 ID로 로드합니다:
+
 ```python
 with open('accessions.txt', 'rt') as fp:
     ACCESSIONS = fp.readlines()
     ACCESSIONS = [ line.strip() for line in ACCESSIONS ]
     
-print(f'ACCESSIONS is a Python list of length {len(ACCESSIONS)}')
+print(f'ACCESSIONS는 길이가 {len(ACCESSIONS)}인 Python 리스트입니다.')
 print(ACCESSIONS)
 
 rule all:
@@ -241,34 +206,29 @@ rule sketch_genome:
 
 ```
 
-and build sourmash signatures for each accession.
+그리고 각 접근 번호에 대해 sourmash 서명을 빌드합니다.
 
-### Loading a specific column from a CSV file
+### CSV 파일의 특정 열에서 불러오기
 
-If instead of a text file you have a CSV file with multiple columns,
-and the IDs to load are all in one column, you can use the Python
-[pandas library](https://pandas.pydata.org/) to read in the CSV. In the code below,
-`pandas.read_csv` loads the CSV into a pandas DataFrame object, and then
-we select the `accession` column and use that as an iterable.
+텍스트 파일 대신 여러 열이 있는 CSV 파일이 있고 로드할 ID들이 모두 한 열에 있다면, Python의 [pandas 라이브러리](https://pandas.pydata.org/)를 사용하여 CSV를 읽어올 수 있습니다. 아래 코드에서 `pandas.read_csv`는 CSV를 pandas DataFrame 객체로 로드하고, 우리는 `accession` 열을 선택하여 이를 반복 가능한 객체로 사용합니다.
 
-File `accessions.csv`:
+`accessions.csv` 파일 내용:
 ```csv
 accession,information
 GCF_000017325.1,genome 1
 GCF_000020225.1,genome 2
 GCF_000021665.1,genome 3
 GCF_008423265.1,genome 4
-
 ```
 
-Snakefile to load `accessions.csv`:
+`accessions.csv`를 로드하기 위한 Snakefile:
 ```python
 import pandas
 
 CSV_DATAFRAME = pandas.read_csv('accessions.csv')
 ACCESSIONS = CSV_DATAFRAME['accession']
 
-print(f'ACCESSIONS is a pandas Series of length {len(ACCESSIONS)}')
+print(f'ACCESSIONS는 길이가 {len(ACCESSIONS)}인 pandas Series입니다.')
 print(ACCESSIONS)
 
 rule all:
@@ -286,13 +246,11 @@ rule sketch_genome:
 
 ```
 
-### Loading from the config file
+### 설정 파일에서 불러오기
 
-Snakemake also supports the use of configuration files, where the
-snakefile supplies the name of the a default config file (which can in
-turn be overridden on the command line.)
+Snakemake는 설정(configuration) 파일의 사용도 지원합니다. Snakefile은 기본 설정 파일의 이름을 제공하며, 이는 다시 명령줄에서 재정의될 수 있습니다.
 
-A config file can also be a good place to put accessions. Consider:
+설정 파일은 접근 번호들을 넣어두기에 좋은 장소이기도 합니다. 다음을 고려해 보세요:
 
 ```yaml
 accessions:
@@ -300,16 +258,16 @@ accessions:
 - GCF_000020225.1
 - GCF_000021665.1
 - GCF_008423265.1
-
 ```
 
-which is used by the following Snakefile:
+이것은 다음 Snakefile에서 사용됩니다:
+
 ```python
 configfile: "config.yml"
 
 ACCESSIONS = config['accessions']
     
-print(f'ACCESSIONS is a Python list of length {len(ACCESSIONS)}')
+print(f'ACCESSIONS는 길이가 {len(ACCESSIONS)}인 Python 리스트입니다.')
 print(ACCESSIONS)
 
 rule all:
@@ -327,24 +285,19 @@ rule sketch_genome:
 
 ```
 
-Here, `config.yml` is a [YAML file](https://en.wikipedia.org/wiki/YAML),
-which is a human-readable format that can also be read by computers.
-We will talk about config files later! CTB.
+여기서 `config.yml`은 사람이 읽을 수 있으면서 컴퓨터도 읽을 수 있는 형식인 [YAML 파일](https://en.wikipedia.org/wiki/YAML)입니다. 설정 파일에 대해서는 나중에 다시 다루겠습니다!
 
-### Using `glob_wildcards` to load IDs or accessions from a set of files
+### `glob_wildcards`를 사용하여 파일 세트에서 ID 또는 접근 번호 불러오기
 
-We introduced the `glob_wildcards` command briefly in the
-[chapter on wildcards](wildcards.md#renaming-files-by-prefix-using-glob_wildcards):
-`glob_wildcards` does pattern matching on files _actually present
-in the directory_.
+우리는 [와일드카드 장](wildcards.md#glob_wildcards를-사용하여-접두사로-파일-이름-변경하기)에서 `glob_wildcards` 명령어를 잠시 소개했습니다: `glob_wildcards`는 *디렉토리에 실제로 존재하는* 파일들에 대해 패턴 매칭을 수행합니다.
 
-Here's a Snakefile that uses `glob_wildcards` to get the four accessions
-from the actual filenames:
+다음은 실제 파일 이름으로부터 네 개의 접근 번호를 가져오기 위해 `glob_wildcards`를 사용하는 Snakefile입니다:
+
 ```python
 GLOB_RESULTS = glob_wildcards("genomes/{acc}.fna.gz")
 ACCESSIONS = GLOB_RESULTS.acc
 
-print(f'ACCESSIONS is a Python list of length {len(ACCESSIONS)}')
+print(f'ACCESSIONS는 길이가 {len(ACCESSIONS)}인 Python 리스트입니다.')
 print(ACCESSIONS)
 
 rule all:
@@ -362,42 +315,20 @@ rule sketch_genome:
 
 ```
 
-This is a particularly convenient way to get a list of accessions,
-although it can be dangerous to use this. In particular, it is easy to
-accidentally delete a file and not notice that a sample is missing!
-For that reason we suggest providing an independent list of files to
-load for many situations.
+이는 접근 번호 목록을 가져오는 매우 편리한 방법이지만, 위험할 수도 있습니다. 특히 실수로 파일을 삭제하고도 샘플 하나가 빠졌다는 사실을 알아차리지 못하기 쉽습니다! 그런 이유로 많은 상황에서 로드할 독립적인 파일 목록을 제공하는 것을 권장합니다.
 
-CTB:
-* note acc vs accession in snakefile
-* note repeated pattern for INPUT but not OUTPUT - but glob_wildcards vs wildcard vs expand!
-* discuss use case for samples; recipes?
-* link to warning/reiterate warning
-* "We discuss glob_wildcards more ..." - constraints, wildcards, where else? Is there more to it?
-* cover multiext too?
+## 와일드카드와 `expand` - 맺음말
 
-## Wildcards and `expand` - some closing thoughts
+와일드카드와 결합된 `expand`는 매우 강력하고 유용합니다. 하지만 와일드카드와 마찬가지로 이러한 강력함에는 약간의 복잡성이 따릅니다. 다음은 이러한 기능들이 어떻게 결합되는지에 대한 간단한 요약입니다.
 
-Combined with wildcards, `expand` is extremely powerful and useful.
-Just like wildcards, however, this power comes with some complexity.
-Here is a brief rundown of how these features combine.
+* **`expand` 함수**는 패턴과 채워 넣을 값 리스트를 사용하여 *생성할 파일 목록*을 만듭니다.
+* **규칙의 와일드카드**는 이름이 패턴과 일치하는 파일을 생성하기 위한 *레시피*를 제공합니다.
 
-The `expand` function makes a _list of files to create_ from a pattern and
-a list of values to fill in.
+일반적으로 Snakefile에서 우리는 특정 패턴과 일치하는 파일 목록을 생성하기 위해 `expand`를 사용하고, 그런 다음 해당 파일들을 실제로 생성하기 위해 와일드카드를 사용하는 규칙을 작성합니다.
 
-Wildcards in rules provide _recipes_ to create files whose names match a
-pattern.
+`expand`와 함께 사용할 값 목록은 텍스트 파일, CSV 파일, 설정 파일을 포함한 다양한 소스에서 가져올 수 있습니다. 또한 패턴을 사용하여 실제로 존재하는 파일에서 값 목록을 *추출*하는 `glob_wildcards`에서 가져올 수도 있습니다.
 
-Typically in Snakefiles we use `expand` to generate a list of files that
-match a certain pattern, and then write a rule that uses wildcards to
-generate those actual files.
+## 링크 및 참고 자료
 
-The list of values to use with `expand` can come from many places, including
-text files, CSV files, and config files. It can _also_ come from
-`glob_wildcards`, which uses a pattern to _extract_ the list of values from
-files that are actually present.
-
-## Links and references
-
-* [snakemake reference documentation for expand](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#the-expand-function)
-* The [Python `itertools`](https://docs.python.org/3/library/itertools.html) documentation.
+* [`expand` 함수에 대한 Snakemake 참고 문서](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#the-expand-function)
+* [Python `itertools`](https://docs.python.org/3/library/itertools.html) 문서
